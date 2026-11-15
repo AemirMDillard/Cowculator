@@ -108,10 +108,11 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
 function PixelLogo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="group flex items-center gap-2" aria-label="Cowculator home">
-      <span className="logo-cow" aria-hidden="true">
-        <i />
-        <b />
-      </span>
+      <img
+        src="/images/cowculator-logo.png"
+        alt="Cowculator"
+        className="w-12 h-12 object-contain"
+      />
       <span
         className={`${compact ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl'} font-black tracking-[-.04em]`}
       >
@@ -170,7 +171,7 @@ export function SiteFooter() {
         <div>
           <p className="pixel-label text-[#E9D48E]">DISCLAIMER</p>
           <p className="mt-3 text-xs leading-5 text-[#F5F0DF]/60">
-            All figures are based of peer-reviewed research estimates, not exact personal savings. Your actual
+            All figures are based on peer-reviewed research estimates, not exact personal savings. Your actual
             impact may vary.
           </p>
         </div>
@@ -302,7 +303,7 @@ export function LandingPage() {
               FROM COMPASSION TO <span>ACTION</span>
             </h2>
             <p className="mt-4 text-[#3F382F]/65">
-              The age of performative animal and planet lovers is over. Can you make at least 2 changes to minimize your impact?
+              The age of performative love is over. Can you make at least 2 dietary changes to minimize harm?
             </p>
           </div>
           <div className="mt-14 grid gap-6 md:grid-cols-3">
@@ -790,7 +791,7 @@ export function MealPlanPage() {
             href="/results"
             className="mt-8 inline-block text-sm font-bold underline underline-offset-4"
           >
-            No thanks, back to my results
+            back to my results
           </Link>
         </div>
       </div>
@@ -900,7 +901,7 @@ export function DashboardPage() {
           <div>
             <span className="eyebrow">PLAYER DASHBOARD</span>
             <h1 className="mt-2 text-4xl font-black sm:text-5xl">
-              WELCOME BACK, <span className="text-[#A8B99A]">PLANET PAL.</span>
+              WELCOME BACK, <span className="text-[#A8B99A]">MOO-MATICIAN.</span>
             </h1>
           </div>
           <select
