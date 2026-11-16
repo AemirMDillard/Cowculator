@@ -10,7 +10,8 @@
     "format": "oxfmt",
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
-    "payload": "NODE_OPTIONS=--no-deprecation payload"
+    "payload": "NODE_OPTIONS=--no-deprecation payload",
+    "seed:foods": "tsx src/seed/loadFoods.ts"
   },
   "dependencies": {
     "@neon/config": "^1.14.0",

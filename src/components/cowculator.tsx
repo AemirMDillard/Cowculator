@@ -129,26 +129,131 @@ const nav = [
   ['My impact', '/dashboard'],
 ]
 
+
 export function SiteHeader() {
   const path = usePathname()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+
+  useEffect(() => {
+    let active = true
+
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/users/me', {
+          credentials: 'include',
+        })
+
+        const data = await response.json()
+
+        if (active) {
+          setIsLoggedIn(Boolean(response.ok && data.user))
+        }
+      } catch {
+        if (active) {
+          setIsLoggedIn(false)
+        }
+      }
+    }
+
+    checkAuth()
+
+    window.addEventListener('cowculator-auth-change', checkAuth)
+
+    return () => {
+      active = false
+      window.removeEventListener('cowculator-auth-change', checkAuth)
+    }
+  }, [])
+
+  const logout = async () => {
+    try {
+      const response = await fetch('/api/users/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+
+      if (response.ok) {
+        setIsLoggedIn(false)
+        setAccountMenuOpen(false)
+        window.location.href = '/'
+      }
+    } catch {
+      console.error('Unable to log out.')
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b-2 border-[#3F382F]/15 bg-[#F5F0DF]/95 backdrop-blur">
       <div className="mx-auto flex h-[72px] max-w-[1180px] items-center justify-between px-5 lg:px-8">
         <PixelLogo compact />
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Main navigation">
+
+        <nav
+          className="hidden items-center gap-7 md:flex"
+          aria-label="Main navigation"
+        >
           {nav.map(([label, href]) => (
-            <Link key={href} href={href} className={`nav-link ${path === href ? 'active' : ''}`}>
+            <Link
+              key={href}
+              href={href}
+              className={`nav-link ${path === href ? 'active' : ''}`}
+            >
               {label}
             </Link>
           ))}
         </nav>
-        <Link href="/calculator" className="pixel-button small">
-          Start calculating <Icon name="arrow" size={16} />
-        </Link>
+
+        {isLoggedIn ? (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+              className="pixel-button small flex items-center gap-2"
+            >
+              <Icon name="user" size={16} />
+              My Account
+              <Icon name="arrow" size={14} />
+            </button>
+
+            {accountMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-48 rounded-sm border-2 border-[#3F382F]/20 bg-[#F5F0DF] p-2 shadow-lg">
+                <Link
+                  href="/dashboard"
+                  className="block px-3 py-2 text-sm font-bold text-[#3F382F] hover:bg-[#A8B99A]/25"
+                  onClick={() => setAccountMenuOpen(false)}
+                >
+                  My Dashboard
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="block w-full px-3 py-2 text-left text-sm font-bold text-[#3F382F] hover:bg-[#A8B99A]/25"
+                >
+                  Log Out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="text-sm font-bold text-[#3F382F] hover:text-[#8B9B7C]"
+            >
+              Log in
+            </Link>
+
+            <Link href="/signup" className="pixel-button small">
+              Sign up <Icon name="arrow" size={16} />
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   )
 }
+
 
 export function SiteFooter() {
   return (
@@ -163,7 +268,7 @@ export function SiteFooter() {
         <div>
           <p className="pixel-label text-[#E9D48E]">EXPLORE</p>
           <div className="mt-3 flex flex-col gap-2 text-sm">
-            <Link href="/calculator">Calculate impact</Link>
+            <Link href="/calculator">Cowculate impact</Link>
             <Link href="/swaps">Sustainable swaps</Link>
             <Link href="/leaderboard">Leaderboard</Link>
           </div>
@@ -205,7 +310,7 @@ function CowMascot({ children, small = false }: { children?: ReactNode; small?: 
               <span className="screen-kicker">YOUR IMPACT</span>
               <strong>READY?</strong>
               <Link href="/calculator" className="screen-kicker">
-                Do moothematics <Icon name="arrow" />
+                Let's begin. <Icon name="arrow" />
               </Link>
             </>
           )}
@@ -282,7 +387,7 @@ export function LandingPage() {
                   </i>
                 ))}
               </span>
-              Join heros for the planet globally!
+              Join the moo-vement for a kinder planet!
             </div>
           </div>
           <div className="relative flex min-h-[520px] items-center justify-center">
@@ -891,6 +996,387 @@ export function LeaderboardPage() {
     </main>
   )
 }
+
+
+
+export function SignupPage() {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [wantsMealPlan, setWantsMealPlan] = useState(false)
+
+  
+const submit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
+  setError('')
+  setLoading(true)
+
+  try {
+    // Retrieve the user's saved sustainability quiz answers.
+    const savedAnswers = localStorage.getItem('cowculator-answers')
+
+    let quizResponses = null
+
+    if (savedAnswers) {
+      try {
+        quizResponses = JSON.parse(savedAnswers)
+      } catch {
+        throw new Error(
+          'Your saved quiz answers could not be read. Please retake the quiz before signing up.'
+        )
+      }
+    }
+
+    // Create the user's account and save their quiz responses.
+    const response = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        wantsMealPlan,
+        quizResponses,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(
+        data.errors?.[0]?.message ||
+        data.message ||
+        'Unable to create your account. Please try again.'
+      )
+    }
+
+    setSuccess(true)
+  } catch (err) {
+    setError(
+      err instanceof Error
+        ? err.message
+        : 'Something went wrong. Please try again.'
+    )
+  } finally {
+    setLoading(false)
+  }
+}
+
+
+  return (
+    <main className="page-shell flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 sm:py-16">
+      <div className="signup-card mx-auto w-full max-w-5xl">
+        <div className="signup-art">
+          <CowMascot small />
+          <div className="paper-sheet">
+            <span>JOIN THE</span>
+            <b>
+              PLANET
+              <br />
+              HERD
+            </b>
+            <i>FREE</i>
+          </div>
+        </div>
+
+        <div className="signup-copy min-w-0 px-6 py-8 sm:px-9 sm:py-10">
+          <h1 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">
+            JOIN THE
+            <br />
+            <span className="text-[#A8B99A]">MOO-VEMENT.</span>
+          </h1>
+
+          <p className="mt-4 text-sm leading-6 text-[#3F382F]/70 sm:text-base">
+            Create your Cowculator account to save your progress,
+            track your impact, and keep earning points for the planet.
+          </p>
+
+          {success ? (
+            <div className="success-box mt-7">
+              <Icon name="check" size={26} />
+              <div>
+                <b>Welcome to the herd!</b>
+                <p>Your account was successfully created.</p>
+              </div>
+            </div>
+          ) : (
+            <form className="mt-7 space-y-5" onSubmit={submit}>
+              <div className="space-y-2">
+                <label
+                  htmlFor="signup-name"
+                  className="block text-xs font-bold tracking-wider text-[#3F382F]"
+                >
+                  YOUR NAME
+                </label>
+                <input
+                  id="signup-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  required
+                  minLength={2}
+                  maxLength={100}
+                  autoComplete="name"
+                  className="w-full rounded-sm border-2 border-[#3F382F]/25 bg-white px-4 py-3 text-sm text-[#3F382F] outline-none transition focus:border-[#A8B99A]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="signup-email"
+                  className="block text-xs font-bold tracking-wider text-[#3F382F]"
+                >
+                  EMAIL ADDRESS
+                </label>
+                <input
+                  id="signup-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  autoComplete="email"
+                  className="w-full rounded-sm border-2 border-[#3F382F]/25 bg-white px-4 py-3 text-sm text-[#3F382F] outline-none transition focus:border-[#A8B99A]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="signup-password"
+                  className="block text-xs font-bold tracking-wider text-[#3F382F]"
+                >
+                  PASSWORD
+                </label>
+                <input
+                  id="signup-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Create a password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="w-full rounded-sm border-2 border-[#3F382F]/25 bg-white px-4 py-3 text-sm text-[#3F382F] outline-none transition focus:border-[#A8B99A]"
+                />
+                <p className="text-xs text-[#3F382F]/55">
+                  Use at least 8 characters.
+                </p>
+              </div>
+
+              <label className="flex cursor-pointer items-start gap-3 rounded-sm border border-[#3F382F]/15 bg-[#F5F1E8] p-3">
+                <input
+                  type="checkbox"
+                  checked={wantsMealPlan}
+                  onChange={(e) => setWantsMealPlan(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[#A8B99A]"
+                />
+                <span className="text-xs leading-5 text-[#3F382F]/80 sm:text-sm">
+                  Send me the free seven-day plant-forward meal plan by email!
+                </span>
+              </label>
+
+              {error && (
+                <div role="alert" className="error-box">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="pixel-button flex w-full items-center justify-center gap-2"
+                disabled={loading}
+              >
+                {loading ? 'Creating account...' : 'Create my account'}
+                {!loading && <Icon name="arrow" />}
+              </button>
+
+              <p className="flex items-center justify-center gap-1.5 text-center text-xs text-[#3F382F]/55">
+                <Icon name="lock" size={13} />
+                Your password is securely handled by Payload.
+              </p>
+            </form>
+          )}
+
+          <div className="mt-7 border-t border-[#3F382F]/15 pt-5">
+            <Link
+              href="/calculator"
+              className="block text-center text-sm font-bold text-[#3F382F] underline underline-offset-4 transition hover:text-[#8B9B7C]"
+            >
+              Continue without an account
+            </Link>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+
+export function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.errors?.[0]?.message ||
+          data.message ||
+          'Incorrect email or password. Please try again.'
+        )
+      }
+
+      setSuccess(true)
+
+      window.dispatchEvent(new Event('cowculator-auth-change'))
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong. Please try again.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className="page-shell flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 sm:py-16">
+      <div className="signup-card mx-auto w-full max-w-5xl">
+        <div className="signup-art">
+          <CowMascot small />
+          <div className="paper-sheet">
+            <span>WELCOME</span>
+            <b>
+              BACK TO
+              <br />
+              THE HERD
+            </b>
+            <i>HI!</i>
+          </div>
+        </div>
+
+        <div className="signup-copy min-w-0 px-6 py-8 sm:px-9 sm:py-10">
+          <h1 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">
+            WELCOME
+            <br />
+            <span className="text-[#A8B99A]">BACK.</span>
+          </h1>
+
+          <p className="mt-4 text-sm leading-6 text-[#3F382F]/70 sm:text-base">
+            Log in to Cowculator to revisit your progress,
+            track your impact, and keep earning points for the planet.
+          </p>
+
+          {success ? (
+            <div className="success-box mt-7">
+              <Icon name="check" size={26} />
+              <div>
+                <b>You're back in the herd!</b>
+                <p>You successfully logged in.</p>
+              </div>
+            </div>
+          ) : (
+            <form className="mt-7 space-y-5" onSubmit={submit}>
+              <div className="space-y-2">
+                <label
+                  htmlFor="login-email"
+                  className="block text-xs font-bold tracking-wider text-[#3F382F]"
+                >
+                  EMAIL ADDRESS
+                </label>
+                <input
+                  id="login-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  autoComplete="email"
+                  className="w-full rounded-sm border-2 border-[#3F382F]/25 bg-white px-4 py-3 text-sm text-[#3F382F] outline-none transition focus:border-[#A8B99A]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="login-password"
+                  className="block text-xs font-bold tracking-wider text-[#3F382F]"
+                >
+                  PASSWORD
+                </label>
+                <input
+                  id="login-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Your password"
+                  required
+                  autoComplete="current-password"
+                  className="w-full rounded-sm border-2 border-[#3F382F]/25 bg-white px-4 py-3 text-sm text-[#3F382F] outline-none transition focus:border-[#A8B99A]"
+                />
+              </div>
+
+              {error && (
+                <div role="alert" className="error-box">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="pixel-button flex w-full items-center justify-center gap-2"
+                disabled={loading}
+              >
+                {loading ? 'Logging in...' : 'Log in'}
+                {!loading && <Icon name="arrow" />}
+              </button>
+
+              <p className="flex items-center justify-center gap-1.5 text-center text-xs text-[#3F382F]/55">
+                <Icon name="lock" size={13} />
+                Your account is securely authenticated by Payload.
+              </p>
+            </form>
+          )}
+
+          <div className="mt-7 border-t border-[#3F382F]/15 pt-5">
+            <Link
+              href="/signup"
+              className="block text-center text-sm font-bold text-[#3F382F] underline underline-offset-4 transition hover:text-[#8B9B7C]"
+            >
+              Don't have an account? Sign up
+            </Link>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
+
 
 export function DashboardPage() {
   const [period, setPeriod] = useState('This month')

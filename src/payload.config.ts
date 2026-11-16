@@ -10,6 +10,11 @@ import { Media } from './collections/Media'
 import { Folders } from './collections/Folders'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
+import { Foods } from './collections/Foods'
+import { Swaps } from './collections/Swaps'
+import { Sources } from './collections/Sources'
+import { Leaderboard } from './collections/Leaderboard'
+import { ImpactFactors } from './collections/ImpactFactors'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -39,7 +44,7 @@ export default buildConfig({
     fallbackLanguage: 'en',
     supportedLanguages: { en: adminLanguage },
   },
-  collections: [Admins, Users, Media, Folders, Tags],
+  collections: [Admins, Users, Media, Folders, Tags, Foods, Swaps, Sources, ImpactFactors, Leaderboard],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
