@@ -11,7 +11,7 @@ const title = makeSiteSettings.title ?? defaultTitle
 const description =
   makeSiteSettings.description ??
   'A playful dietary impact calculator for finding planet-friendly food swaps.'
-const favicon = makeSiteSettings.icons?.icon ?? '/favicon.svg'
+const favicon = makeSiteSettings.icons?.icon ?? '/images/cowculator-logo.png'
 const socialImage = makeSiteSettings.openGraph?.image
 const googleAnalyticsId = sanitizeHtmlAttribute(makeSiteSettings.analytics?.googleAnalyticsId)
 

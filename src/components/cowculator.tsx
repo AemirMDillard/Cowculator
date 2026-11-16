@@ -303,7 +303,7 @@ export function LandingPage() {
               FROM COMPASSION TO <span>ACTION</span>
             </h2>
             <p className="mt-4 text-[#3F382F]/65">
-              The age of performative love is over. Can you make at least 2 dietary changes to minimize harm?
+              Can you make at least 2 dietary changes to minimize harm?
             </p>
           </div>
           <div className="mt-14 grid gap-6 md:grid-cols-3">
