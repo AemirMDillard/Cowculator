@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-[#F5F0DF] text-[#3F382F] antialiased">
         <BodyCustomCode html={customScripts?.bodyStart} />
         {addBypassLinks && (
-          <a className="figma-bypass-link" href="#root">
+          <a className="skip-link" href="#root">
             Skip to content
           </a>
         )}

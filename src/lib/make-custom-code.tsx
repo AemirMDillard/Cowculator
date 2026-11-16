@@ -28,7 +28,7 @@ export function renderHeadCustomCode(
     replace(domNode) {
       if (domNode instanceof Element && domNode.name === "script") {
         const props = attributesToProps(domNode.attribs) as ScriptProps
-        const id = props.id || `figma-custom-code-${slot}-${scriptIndex}`
+        const id = props.id || `custom-code-${slot}-${scriptIndex}`
         scriptIndex += 1
         const contents = domNode.children
           .map((child) => (child.type === "text" ? child.data : ""))
@@ -65,7 +65,7 @@ export function BodyCustomCode({ html }: { html: string | undefined }) {
 
   return (
     <div
-      className="figma-custom-code-fragment"
+      className="custom-code-fragment"
       suppressHydrationWarning
       dangerouslySetInnerHTML={contents}
     />

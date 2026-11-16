@@ -1,4 +1,4 @@
-# figma-make-app
+# cowculaator
 
 React + Next.js + Payload + Tailwind CSS project running inside Figma Make.
 

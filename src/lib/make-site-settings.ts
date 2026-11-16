@@ -1,5 +1,3 @@
-import rawSiteSettings from '../../.figma/make/site.json'
-
 export type MakeSiteSettings = {
   title?: string
   description?: string
@@ -27,7 +25,7 @@ export type MakeSiteSettings = {
   }
 }
 
-export const makeSiteSettings = rawSiteSettings as MakeSiteSettings
+export const makeSiteSettings: MakeSiteSettings = {}
 
 export function sanitizeHtmlAttribute(value: string | undefined): string {
   return value?.replace(/[^a-zA-Z0-9_-]/g, '') || ''

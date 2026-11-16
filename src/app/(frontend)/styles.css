@@ -1389,11 +1389,11 @@
   }
 }
 
-.figma-custom-code-fragment {
+.custom-code-fragment {
   display: contents;
 }
 
-.figma-bypass-link {
+.skip-link {
   position: fixed;
   top: 8px;
   left: 8px;
@@ -1409,6 +1409,6 @@
   text-decoration: none;
 }
 
-.figma-bypass-link:focus {
+.skip-link:focus {
   transform: translateY(0);
 }
