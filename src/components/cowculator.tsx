@@ -473,48 +473,154 @@ export function LandingPage() {
   )
 }
 
-const questions = [
+
+type Question = {
+  id: string
+  category: string
+  question: string
+  detail: string
+  options: string[]
+}
+
+const dietPatternQuestion: Question = {
+  id: 'dietPattern',
+  category: 'START HERE',
+  question: 'Which best describes how you eat right now?',
+  detail: 'There is no right or wrong answer. Choose what feels closest.',
+  options: [
+    'Fully plant-based (vegan)',
+    'Mostly plant-based',
+    'Vegetarian',
+    'A mix of plant and animal foods',
+    'Something else / not sure',
+  ],
+}
+
+const plantBasedQuestions: Question[] = [
   {
+    id: 'plantBasedGoal',
+    category: 'YOUR GOALS',
+    question: 'What would you like to explore?',
+    detail: 'Cowculator can help even if you already eat entirely plant-based.',
+    options: [
+      'Discover more plant-based foods',
+      'Explore nutritional variety',
+      'Understand my environmental impact',
+      'Explore animal welfare impact',
+      'Just looking around',
+    ],
+  },
+]
+
+const vegetarianQuestions: Question[] = [
+  {
+    id: 'dairy',
+    category: 'DAIRY',
+    question: 'How often do you consume dairy?',
+    detail: 'Think milk, cheese, yogurt, butter and other dairy products.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
+  },
+  {
+    id: 'eggs',
+    category: 'EGGS',
+    question: 'How often do you eat eggs?',
+    detail: 'Include eggs in breakfasts, baking and other meals.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
+  },
+]
+
+const animalFoodQuestions: Question[] = [
+  {
+    id: 'redMeat',
     category: 'MEAT',
     question: 'How often do you eat red meat?',
     detail: 'Think beef, lamb, burgers and steaks.',
     options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
   },
   {
-    category: 'DAIRY',
-    question: 'How often do you have dairy milk?',
-    detail: 'In drinks, cereal, cooking or on its own.',
-    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
-  },
-  {
-    category: 'EGGS',
-    question: 'How often do eggs land on your plate?',
-    detail: 'Breakfasts, baking and meals all count.',
-    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
-  },
-  {
+    id: 'poultry',
     category: 'POULTRY',
-    question: 'How often do you eat chicken?',
-    detail: 'Include meals at home and eating out.',
+    question: 'How often do you eat poultry?',
+    detail: 'Think chicken and turkey.',
     options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
   },
   {
-    category: 'PLANTS',
-    question: 'How many plant-based meals do you eat?',
-    detail: 'Meals built around beans, tofu or vegetables.',
-    options: ['Almost none', '1–3 per week', '4–6 per week', 'Every day'],
+    id: 'seafood',
+    category: 'SEAFOOD',
+    question: 'How often do you eat fish or seafood?',
+    detail: 'Include fish, shrimp, shellfish and other seafood.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
+  },
+  {
+    id: 'dairy',
+    category: 'DAIRY',
+    question: 'How often do you consume dairy?',
+    detail: 'Think milk, cheese, yogurt, butter and other dairy products.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
+  },
+  {
+    id: 'eggs',
+    category: 'EGGS',
+    question: 'How often do you eat eggs?',
+    detail: 'Include eggs in breakfasts, baking and other meals.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
   },
 ]
 
+const plantMealQuestion: Question = {
+  id: 'plantMeals',
+  category: 'PLANT-BASED FOODS',
+  question: 'How often do you eat fully plant-based meals?',
+  detail: 'Think meals built around beans, lentils, tofu, vegetables or grains.',
+  options: [
+    'Almost never',
+    '1–3 times a week',
+    '4–6 times a week',
+    'Every day',
+  ],
+}
+
+function getQuestions(dietPattern?: string): Question[] {
+  if (!dietPattern) return [dietPatternQuestion]
+
+  if (dietPattern === 'Fully plant-based (vegan)') {
+    return [dietPatternQuestion, ...plantBasedQuestions]
+  }
+
+  if (dietPattern === 'Vegetarian') {
+    return [
+      dietPatternQuestion,
+      ...vegetarianQuestions,
+      plantMealQuestion,
+    ]
+  }
+
+  return [
+    dietPatternQuestion,
+    ...animalFoodQuestions,
+    plantMealQuestion,
+  ]
+}
+
+
 export function CalculatorPage() {
   const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, string>>({})
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+
+  const questions = getQuestions(answers.dietPattern)
   const q = questions[step]
+  const selectedAnswer = answers[q.id]
+
   const select = (answer: string) => {
-    const next = { ...answers, [step]: answer }
+    const next =
+      q.id === 'dietPattern'
+        ? { dietPattern: answer }
+        : { ...answers, [q.id]: answer }
+
     setAnswers(next)
     localStorage.setItem('cowculator-answers', JSON.stringify(next))
   }
+
   return (
     <main className="page-shell calculator-bg">
       <div className="mx-auto max-w-[1050px] px-5 py-12">
@@ -525,6 +631,7 @@ export function CalculatorPage() {
               WHAT&apos;S ON YOUR PLATE?
             </h1>
           </div>
+
           <div className="hidden text-right sm:block">
             <span className="pixel-label">
               QUESTION {step + 1} / {questions.length}
@@ -533,12 +640,15 @@ export function CalculatorPage() {
               {questions.map((_, i) => (
                 <i
                   key={i}
-                  className={`h-2 w-7 ${i <= step ? 'bg-[#E9B8B0]' : 'bg-[#3F382F]/15'}`}
+                  className={`h-2 w-7 ${
+                    i <= step ? 'bg-[#E9B8B0]' : 'bg-[#3F382F]/15'
+                  }`}
                 />
               ))}
             </div>
           </div>
         </div>
+
         <div className="calculator-stage">
           <CowMascot>
             <div className="w-full">
@@ -549,6 +659,7 @@ export function CalculatorPage() {
               <span className="screen-line">{q.detail}</span>
             </div>
           </CowMascot>
+
           <div className="answer-panel">
             <div className="sm:hidden">
               <span className="pixel-label">
@@ -558,28 +669,38 @@ export function CalculatorPage() {
                 {questions.map((_, i) => (
                   <i
                     key={i}
-                    className={`h-2 flex-1 ${i <= step ? 'bg-[#E9B8B0]' : 'bg-[#3F382F]/15'}`}
+                    className={`h-2 flex-1 ${
+                      i <= step ? 'bg-[#E9B8B0]' : 'bg-[#3F382F]/15'
+                    }`}
                   />
                 ))}
               </div>
             </div>
+
             <p className="pixel-label mt-6 sm:mt-0">CHOOSE ONE</p>
+
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {q.options.map((option, i) => (
                 <button
                   key={option}
-                  className={`answer-button ${answers[step] === option ? 'selected' : ''}`}
+                  className={`answer-button ${
+                    selectedAnswer === option ? 'selected' : ''
+                  }`}
                   onClick={() => select(option)}
                 >
                   <span>{String.fromCharCode(65 + i)}</span>
                   {option}
-                  {answers[step] === option && <Icon name="check" size={17} />}
+                  {selectedAnswer === option && (
+                    <Icon name="check" size={17} />
+                  )}
                 </button>
               ))}
             </div>
+
             <p className="mt-5 text-sm text-[#3F382F]/55">
-              There are no correct answers! honest estimates give you better swaps.
+              There are no correct answers! Honest estimates give you better swaps.
             </p>
+
             <div className="mt-8 flex justify-between gap-3">
               <button
                 className="pixel-button secondary"
@@ -588,17 +709,20 @@ export function CalculatorPage() {
               >
                 Previous
               </button>
+
               {step < questions.length - 1 ? (
                 <button
                   className="pixel-button"
-                  disabled={!answers[step]}
+                  disabled={!selectedAnswer}
                   onClick={() => setStep((s) => s + 1)}
                 >
                   Next <Icon name="arrow" />
                 </button>
               ) : (
                 <Link
-                  className={`pixel-button ${!answers[step] ? 'pointer-events-none opacity-40' : ''}`}
+                  className={`pixel-button ${
+                    !selectedAnswer ? 'pointer-events-none opacity-40' : ''
+                  }`}
                   href="/swaps"
                 >
                   See my swaps <Icon name="arrow" />
@@ -612,122 +736,92 @@ export function CalculatorPage() {
   )
 }
 
-const swapData = [
-  {
-    from: 'Beef burger',
-    to: 'Smoky tofu burger',
-    icon: 'B→T',
-    carbon: '18.2 kg',
-    water: '1,740 L',
-    points: 480,
-    color: 'pink',
-  },
-  {
-    from: 'Dairy milk',
-    to: 'Soy milk',
-    icon: 'M→S',
-    carbon: '5.6 kg',
-    water: '628 L',
-    points: 240,
-    color: 'green',
-  },
-  {
-    from: 'Chicken',
-    to: 'Plant protein',
-    icon: 'C→P',
-    carbon: '4.1 kg',
-    water: '390 L',
-    points: 180,
-    color: 'yellow',
-  },
-  {
-    from: 'Dairy yogurt',
-    to: 'Soy yogurt',
-    icon: 'Y→S',
-    carbon: '2.8 kg',
-    water: '212 L',
-    points: 120,
-    color: 'pink',
-  },
-]
+// Keep using your existing Icon, IconName, and colors definitions.
 
-export function SwapsPage() {
-  const [selected, setSelected] = useState<number[]>([0, 1])
-  const toggle = (i: number) =>
-    setSelected((x) => (x.includes(i) ? x.filter((v) => v !== i) : [...x, i]))
-  useEffect(() => {
-    localStorage.setItem('cowculator-swaps', JSON.stringify(selected))
-  }, [selected])
-  const points = selected.reduce((sum, i) => sum + swapData[i].points, 0)
-  return (
-    <main className="page-shell">
-      <div className="mx-auto max-w-[1180px] px-5 py-14 lg:px-8">
-        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-          <div>
-            <span className="eyebrow">LEVEL 2 · POWER-UPS</span>
-            <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-6xl">
-              CHOOSE YOUR <span className="text-[#A8B99A]">SWAPS</span>
-            </h1>
-            <p className="mt-4 max-w-2xl text-[#3F382F]/65">
-              Pick upgrades that feel doable. Your estimated monthly savings update as you go.
-            </p>
-          </div>
-          <div className="points-pill">
-            <Icon name="spark" />
-            <span>
-              <b>{points}</b> OPTIMIZATION PTS
-            </span>
-          </div>
-        </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          {swapData.map((swap, i) => (
-            <article
-              key={swap.from}
-              className={`swap-card ${selected.includes(i) ? 'chosen' : ''}`}
-            >
-              <div className={`swap-icon ${swap.color}`}>{swap.icon}</div>
-              <div className="min-w-0 flex-1">
-                <span className="pixel-label">SWAP {String(i + 1).padStart(2, '0')}</span>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xl font-black">
-                  <s className="text-[#3F382F]/40">{swap.from}</s>
-                  <Icon name="arrow" size={18} />
-                  <span>{swap.to}</span>
-                </div>
-                <div className="mt-5 flex gap-5 text-sm">
-                  <span>
-                    <Icon name="leaf" size={16} />
-                    <b>{swap.carbon}</b> CO₂e
-                  </span>
-                  <span>
-                    <Icon name="water" size={16} />
-                    <b>{swap.water}</b> water
-                  </span>
-                </div>
-              </div>
-              <button
-                aria-label={`${selected.includes(i) ? 'Remove' : 'Select'} ${swap.from} swap`}
-                onClick={() => toggle(i)}
-                className="select-toggle"
-              >
-                {selected.includes(i) ? <Icon name="check" /> : '+'}
-              </button>
-              <div className="point-tag">+{swap.points} PTS</div>
-            </article>
-          ))}
-        </div>
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-[#3F382F]/20 pt-8 sm:flex-row">
-          <p className="text-sm">
-            <b>{selected.length} power-ups selected</b>
-            <br />
-            <span className="text-[#3F382F]/55">You can always change these later.</span>
-          </p>
-          <Link href="/results" className="pixel-button">
-            Reveal my impact <Icon name="spark" />
-          </Link>
-        </div>
-      </div>
-    </main>
-  )
+type ImpactValues = {
+  co2eSaved: number
+  waterSaved: number
+  landSaved: number
+  animalsSpared: number
+}
+
+type ImpactResponse = {
+  projectedImpact: ImpactValues
+  cumulativeImpact: ImpactValues & {
+    plantBasedDays: number
+  }
+  currentStreak: number
+  selectedSwapCount: number
+  points: number | null
+  displayName: string
+}
+
+type LeaderboardEntry = {
+  id: string
+  displayName: string
+  month: number
+  year: number
+  animalImpactScore: number
+  environmentalScore: number
+  plantBasedScore: number
+  combinedScore: number
+  rank: number
+}
+
+type LeaderboardResponse = {
+  entries: LeaderboardEntry[]
+  currentUserId?: string
+}
+
+const emptyImpact: ImpactResponse = {
+  projectedImpact: {
+    co2eSaved: 0,
+    waterSaved: 0,
+    landSaved: 0,
+    animalsSpared: 0,
+  },
+  cumulativeImpact: {
+    co2eSaved: 0,
+    waterSaved: 0,
+    landSaved: 0,
+    animalsSpared: 0,
+    plantBasedDays: 0,
+  },
+  currentStreak: 0,
+  selectedSwapCount: 0,
+  points: null,
+  displayName: 'Planet Pal',
+}
+
+function formatNumber(value: number, decimals = 0) {
+  return new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: decimals,
+    minimumFractionDigits: decimals,
+  }).format(value)
+}
+
+function formatCarbon(value: number) {
+  if (value >= 1000) {
+    return `${formatNumber(value / 1000, 2)} t`
+  }
+
+  return `${formatNumber(value, 1)} kg`
+}
+
+function formatWater(value: number) {
+  if (value >= 1000) {
+    return `${formatNumber(value / 1000, 2)} kL`
+  }
+
+  return `${formatNumber(value, 1)} L`
+}
+
+function formatLand(value: number) {
+  return `${formatNumber(value, 2)} m²`
+}
+
+function formatAnimals(value: number) {
+  return formatNumber(value, 2)
 }
 
 function StatCard({
@@ -744,87 +838,266 @@ function StatCard({
   color: string
 }) {
   return (
-    <article className="stat-card" style={{ '--accent': color } as React.CSSProperties}>
+    <article
+      className="stat-card"
+      style={{ '--accent': color } as React.CSSProperties}
+    >
       <span className="stat-icon">
         <Icon name={icon} size={28} />
       </span>
+
       <span className="pixel-label">{label}</span>
+
       <strong>
         {value}
         <small>{unit}</small>
       </strong>
+
       <span className="estimate-label">ESTIMATED / YEAR</span>
     </article>
   )
 }
 
-export function ResultsPage() {
-  const [points, setPoints] = useState(720)
+function useImpactData() {
+  const [data, setData] = useState<ImpactResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
-    try {
-      const ids = JSON.parse(localStorage.getItem('cowculator-swaps') || '[0,1]') as number[]
-      setPoints(ids.reduce((sum, i) => sum + (swapData[i]?.points || 0), 0))
-    } catch {}
+    const controller = new AbortController()
+
+    async function loadImpact() {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const response = await fetch('/api/impact', {
+          credentials: 'include',
+          signal: controller.signal,
+          cache: 'no-store',
+        })
+
+        if (!response.ok) {
+          throw new Error(
+            response.status === 401
+              ? 'Please log in to view your impact.'
+              : 'Unable to load your impact data.'
+          )
+        }
+
+        const result: ImpactResponse = await response.json()
+        setData(result)
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Something went wrong.'
+        )
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadImpact()
+
+    return () => controller.abort()
   }, [])
+
+  return { data, loading, error }
+}
+
+function LoadingMessage() {
+  return (
+    <div className="py-16 text-center">
+      <Icon name="loader" size={28} />
+      <p className="mt-3">Loading your impact...</p>
+    </div>
+  )
+}
+
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <div className="my-8 border-2 border-[#3F382F] bg-white p-5">
+      <p className="font-bold">We couldn't load this information.</p>
+      <p className="mt-2 text-sm">{message}</p>
+      <button
+        className="pixel-button mt-4"
+        onClick={() => window.location.reload()}
+      >
+        Try again
+      </button>
+    </div>
+  )
+}
+
+// RESULTS PAGE
+
+export function ResultsPage() {
+  const { data, loading, error } = useImpactData()
+
+  if (loading) {
+    return (
+      <main className="page-shell results-bg">
+        <div className="mx-auto max-w-[1180px] px-5 py-14">
+          <LoadingMessage />
+        </div>
+      </main>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <main className="page-shell results-bg">
+        <div className="mx-auto max-w-[1180px] px-5 py-14">
+          <ErrorMessage message={error || 'Impact data is unavailable.'} />
+        </div>
+      </main>
+    )
+  }
+
+  const impact = data.projectedImpact
+  const hasImpact =
+    impact.co2eSaved > 0 ||
+    impact.waterSaved > 0 ||
+    impact.landSaved > 0 ||
+    impact.animalsSpared > 0
+
   return (
     <main className="page-shell results-bg">
       <div className="mx-auto max-w-[1180px] px-5 py-14 lg:px-8">
         <div className="result-banner">
           <div>
-            <span className="pixel-label text-[#E9D48E]">LEVEL COMPLETE</span>
+            <span className="pixel-label text-[#E9D48E]">
+              SWAPS COMPLETE
+            </span>
+
             <h1>
               LOOK AT YOU,
               <br />
               PLANET PAL!
             </h1>
-            <p>Your chosen swaps have some serious potential.</p>
+
+            <p>
+              Your selected swaps have the potential to make a difference.
+            </p>
           </div>
+
           <div className="result-score">
             <span>TOTAL SCORE</span>
-            <b>{points.toLocaleString()}</b>
+
+            <b>
+              {data.points === null
+                ? '—'
+                : data.points.toLocaleString()}
+            </b>
+
             <small>OPTIMIZATION POINTS</small>
           </div>
+
           <div className="confetti c1" />
           <div className="confetti c2" />
           <div className="confetti c3" />
         </div>
-        <div className="mt-8 flex items-center justify-between">
-          <h2 className="text-2xl font-black">YOUR POTENTIAL YEARLY IMPACT</h2>
-          <span className="estimate-label">RESEARCH-BASED ESTIMATE</span>
+
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-black">
+            YOUR POTENTIAL YEARLY IMPACT
+          </h2>
+
+          <span className="estimate-label">
+            RESEARCH-BASED ESTIMATE
+          </span>
         </div>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon="leaf" value="286" unit="kg" label="CARBON AVOIDED" color={colors.green} />
-          <StatCard icon="water" value="28.4" unit="kL" label="WATER SAVED" color="#AFC7CE" />
-          <StatCard icon="chart" value="72" unit="m²" label="LAND REDUCED" color={colors.yellow} />
-          <StatCard icon="paw" value="14" unit="" label="ANIMALS SPARED" color={colors.pink} />
-        </div>
+
+        {hasImpact ? (
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              icon="leaf"
+              value={formatNumber(impact.co2eSaved, 1)}
+              unit="kg"
+              label="CO₂e REDUCED"
+              color={colors.green}
+            />
+
+            <StatCard
+              icon="water"
+              value={formatNumber(impact.waterSaved / 1000, 2)}
+              unit="kL"
+              label="WATER REDUCED"
+              color="#AFC7CE"
+            />
+
+            <StatCard
+              icon="chart"
+              value={formatNumber(impact.landSaved, 2)}
+              unit="m²"
+              label="LAND USE REDUCED"
+              color={colors.yellow}
+            />
+
+            <StatCard
+              icon="paw"
+              value={formatAnimals(impact.animalsSpared)}
+              unit=""
+              label="ESTIMATED ANIMAL IMPACT"
+              color={colors.pink}
+            />
+          </div>
+        ) : (
+          <div className="mt-5 border-2 border-[#3F382F] bg-white p-8 text-center">
+            <Icon name="sprout" size={36} />
+            <h3 className="mt-3 text-xl font-black">
+              Your impact is taking shape!
+            </h3>
+            <p className="mt-2 text-[#3F382F]/65">
+              Select eligible swaps with researched impact data to see
+              your projected annual impact here.
+            </p>
+            <Link className="pixel-button mt-5 inline-flex" href="/swaps">
+              Explore swaps
+            </Link>
+          </div>
+        )}
+
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
           <article className="achievement-card">
             <div className="achievement-medal">
               <Icon name="trophy" size={36} />
             </div>
+
             <div>
-              <span className="pixel-label">ACHIEVEMENT UNLOCKED</span>
-              <h3>Udderly Impressive</h3>
-              <p>You chose at least two high-impact food swaps.</p>
+              <span className="pixel-label">YOUR PROGRESS</span>
+              <h3>{data.selectedSwapCount} swaps selected</h3>
+              <p>
+                Every selected plant-based alternative is another
+                opportunity to change your food footprint.
+              </p>
             </div>
-            <span className="reward">+100 BONUS</span>
           </article>
+
           <article className="reality-card">
             <Icon name="spark" />
+
             <div>
               <h3>Potential, not a promise</h3>
               <p>
-                These are projected savings if you keep your swaps. Track them over time to turn
-                potential into progress.
+                These figures represent estimated annual reductions
+                if you consistently follow your selected swaps.
+                They are not measurements of impact already achieved.
               </p>
             </div>
           </article>
         </div>
+
         <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Link className="pixel-button" href="/meal-plan">
+          <Link className="pixel-button" href="/signup">
             Get my free meal plan <Icon name="mail" />
           </Link>
+
           <Link className="pixel-button secondary" href="/dashboard">
             View my dashboard
           </Link>
@@ -834,163 +1107,428 @@ export function ResultsPage() {
   )
 }
 
-export function MealPlanPage() {
-  const [sent, setSent] = useState(false)
-  const submit = (e: FormEvent) => {
-    e.preventDefault()
-    setSent(true)
-  }
-  return (
-    <main className="page-shell grid place-items-center px-5 py-20">
-      <div className="signup-card">
-        <div className="signup-art">
-          <CowMascot small />
-          <div className="paper-sheet">
-            <span>7-DAY</span>
-            <b>
-              MEAL
-              <br />
-              PLAN
-            </b>
-            <i>FREE</i>
-          </div>
-        </div>
-        <div className="signup-copy">
-          <span className="eyebrow">YOUR NEXT POWER-UP</span>
-          <h1>
-            DINNER PLANS,
-            <br />
-            <span>SORTED.</span>
-          </h1>
-          <p>
-            Get a free 7-day plant-forward meal plan tailored to your chosen swaps. Delicious,
-            doable, and delivered to your inbox.
-          </p>
-          {sent ? (
-            <div className="success-box">
-              <Icon name="check" size={26} />
-              <div>
-                <b>Meal plan unlocked!</b>
-                <p>Check your inbox for your first tasty swap.</p>
-              </div>
-            </div>
-          ) : (
-            <form className="mt-7" onSubmit={submit}>
-              <label htmlFor="email">EMAIL ADDRESS</label>
-              <div className="email-row">
-                <span>
-                  <Icon name="mail" />
-                </span>
-                <input required id="email" type="email" placeholder="you@example.com" />
-                <button type="submit">
-                  Send my plan <Icon name="arrow" size={18} />
-                </button>
-              </div>
-              <small>
-                <Icon name="lock" size={13} /> No spam. Just good food and tiny wins. Unsubscribe
-                anytime.
-              </small>
-            </form>
-          )}
-          <Link
-            href="/results"
-            className="mt-8 inline-block text-sm font-bold underline underline-offset-4"
-          >
-            back to my results
-          </Link>
-        </div>
-      </div>
-    </main>
-  )
-}
-
-const leaders = [
-  ['1', 'Moo-dy Judy', '12,840', '2.4t', '6'],
-  ['2', 'Planty McPlantface', '11,620', '2.1t', '8'],
-  ['3', 'Bean There', '10,950', '1.9t', '4'],
-  ['4', 'Greta Greens', '9,840', '1.7t', '5'],
-  ['5', 'Tofu Fighter', '8,720', '1.5t', '3'],
-  ['18', 'You', '3,480', '286kg', '2'],
-]
+// LEADERBOARD PAGE
 
 export function LeaderboardPage() {
-  const [tab, setTab] = useState('Global')
+  const [tab, setTab] = useState<'Global' | 'Friends' | 'This month'>(
+    'Global'
+  )
+
+  const [data, setData] = useState<LeaderboardResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadLeaderboard() {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const response = await fetch(
+          `/api/leaderboard?period=${encodeURIComponent(tab)}`,
+          {
+            credentials: 'include',
+            signal: controller.signal,
+            cache: 'no-store',
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Unable to load the leaderboard.')
+        }
+
+        const result = await response.json()
+
+        setData({
+          entries: Array.isArray(result.entries)
+            ? result.entries
+            : [],
+          currentUserId: result.currentUserId,
+        })
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Something went wrong.'
+        )
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadLeaderboard()
+
+    return () => controller.abort()
+  }, [tab])
+
   return (
     <main className="page-shell">
       <div className="mx-auto max-w-[1050px] px-5 py-14">
         <div className="text-center">
           <span className="eyebrow">HIGH SCORES</span>
+
           <h1 className="mt-3 text-4xl font-black sm:text-6xl">
-            PLANET PAL <span className="text-[#E9B8B0]">LEADERBOARD</span>
+            PLANET PAL{' '}
+            <span className="text-[#E9B8B0]">LEADERBOARD</span>
           </h1>
+
           <p className="mx-auto mt-4 max-w-xl text-[#3F382F]/65">
-            Every point represents a better choice. See how our herd is changing the game.
+            See how our herd is changing the game.
           </p>
         </div>
+
         <div className="mx-auto mt-9 flex w-fit border-2 border-[#3F382F] bg-white p-1">
-          {['Global', 'Friends', 'This month'].map((x) => (
+          {(['Global', 'Friends', 'This month'] as const).map((item) => (
             <button
-              key={x}
-              onClick={() => setTab(x)}
-              className={`leader-tab ${tab === x ? 'active' : ''}`}
+              key={item}
+              onClick={() => setTab(item)}
+              className={`leader-tab ${tab === item ? 'active' : ''}`}
             >
-              {x}
+              {item}
             </button>
           ))}
         </div>
-        <div className="mt-8 overflow-hidden border-2 border-[#3F382F] bg-white shadow-[8px_8px_0_#3F382F]">
-          <div className="leader-head">
-            <span>RANK / PLAYER</span>
-            <span>IMPACT</span>
-            <span>REFERRALS</span>
-            <span>POINTS</span>
-          </div>
-          {leaders.map((row, i) => (
-            <div key={row[1]} className={`leader-row ${row[1] === 'You' ? 'you' : ''}`}>
-              <span className="rank">{row[0]}</span>
-              <span className="player">
-                <i
-                  style={{
-                    background: [
-                      colors.yellow,
-                      colors.pink,
-                      colors.green,
-                      '#B7C9D1',
-                      '#D2B9A4',
-                      colors.pink,
-                    ][i],
-                  }}
-                >
-                  {row[1][0]}
-                </i>
-                <b>{row[1]}</b>
-                {i < 3 && <Icon name="trophy" size={16} />}
-              </span>
-              <span>{row[3]} CO₂e</span>
-              <span>{row[4]} pals</span>
-              <strong>{row[2]}</strong>
+
+        {loading ? (
+          <LoadingMessage />
+        ) : error ? (
+          <ErrorMessage message={error} />
+        ) : (
+          <div className="mt-8 overflow-hidden border-2 border-[#3F382F] bg-white shadow-[8px_8px_0_#3F382F]">
+            <div className="leader-head">
+              <span>RANK / PLAYER</span>
+              <span>ENVIRONMENTAL SCORE</span>
+              <span>ANIMAL SCORE</span>
+              <span>POINTS</span>
             </div>
-          ))}
-        </div>
+
+            {(Array.isArray(data?.entries) && data.entries.length > 0) ? (
+              data.entries.map((entry) => {
+                const isYou = entry.id === data.currentUserId
+
+                return (
+                  <div
+                    key={entry.id}
+                    className={`leader-row ${isYou ? 'you' : ''}`}
+                  >
+                    <span className="rank">{entry.rank}</span>
+
+                    <span className="player">
+                      <i
+                        style={{
+                          background: isYou
+                            ? colors.pink
+                            : colors.green,
+                        }}
+                      >
+                        {entry.displayName.charAt(0).toUpperCase()}
+                      </i>
+
+                      <b>{entry.displayName}</b>
+
+                      {entry.rank <= 3 && (
+                        <Icon name="trophy" size={16} />
+                      )}
+                    </span>
+
+                    <span>
+                      {formatNumber(entry.environmentalScore)}
+                    </span>
+
+                    <span>
+                      {formatNumber(entry.animalImpactScore)}
+                    </span>
+
+                    <strong>
+                      {formatNumber(entry.combinedScore)}
+                    </strong>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="p-10 text-center">
+                <Icon name="users" size={32} />
+                <h3 className="mt-3 font-black">
+                  No rankings yet
+                </h3>
+                <p className="mt-2 text-sm text-[#3F382F]/65">
+                  There are no leaderboard records for this view yet.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="community-strip">
           <div>
             <Icon name="user" size={28} />
-            <span>
-              JOIN OTHER MOOTHEMATICIANS
-            </span>
+            <span>JOIN OTHER MOOTHEMATICIANS</span>
           </div>
+
           <div>
             <Icon name="leaf" size={28} />
             <span>
-              <b>428 TONNES</b> COMMUNITY CO₂e
+              <b>COMMUNITY</b> IMPACT
             </span>
           </div>
+
           <div>
             <Icon name="spark" size={28} />
             <span>
-              <b>4.2M</b> TOTAL POINTS
+              <b>COMMUNITY</b> POINTS
             </span>
           </div>
+        </div>
+
+        {tab === 'Friends' && (
+          <p className="mt-4 text-center text-sm text-[#3F382F]/60">
+            Friend-specific rankings require a friends or connections
+            relationship in your user data. Your current Leaderboard
+            collection does not contain that relationship yet.
+          </p>
+        )}
+      </div>
+    </main>
+  )
+}
+
+// DASHBOARD PAGE
+
+export function DashboardPage() {
+  const { data, loading, error } = useImpactData()
+
+  const [view, setView] = useState<'projected' | 'cumulative'>(
+    'projected'
+  )
+
+  if (loading) {
+    return (
+      <main className="page-shell">
+        <div className="mx-auto max-w-[1180px] px-5 py-14">
+          <LoadingMessage />
+        </div>
+      </main>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <main className="page-shell">
+        <div className="mx-auto max-w-[1180px] px-5 py-14">
+          <ErrorMessage message={error || 'Dashboard data is unavailable.'} />
+        </div>
+      </main>
+    )
+  }
+
+  const impact =
+    view === 'projected'
+      ? data.projectedImpact
+      : data.cumulativeImpact
+
+  const isProjected = view === 'projected'
+
+  return (
+    <main className="page-shell">
+      <div className="mx-auto max-w-[1180px] px-5 py-12 lg:px-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span className="eyebrow">PLAYER DASHBOARD</span>
+
+            <h1 className="mt-2 text-4xl font-black sm:text-5xl">
+              WELCOME BACK,{' '}
+              <span className="text-[#A8B99A]">
+                MOO-MATICIAN.
+              </span>
+            </h1>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="pixel-label" htmlFor="impact-view">
+              IMPACT VIEW
+            </label>
+
+            <select
+              id="impact-view"
+              aria-label="Impact view"
+              value={view}
+              onChange={(e) =>
+                setView(e.target.value as 'projected' | 'cumulative')
+              }
+              className="period-select"
+            >
+              <option value="projected">Projected annually</option>
+              <option value="cumulative">Tracked totals</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
+          <article className="dashboard-score">
+            <div>
+              <span className="pixel-label text-[#F5F0DF]/70">
+                YOUR OPTIMIZATION SCORE
+              </span>
+
+              <strong>
+                {data.points === null
+                  ? '—'
+                  : data.points.toLocaleString()}
+              </strong>
+
+              <p>
+                {data.selectedSwapCount} selected swaps
+              </p>
+            </div>
+
+            <div className="level-badge">
+              <span>STREAK</span>
+              <b>{data.currentStreak}</b>
+              <small>WEEKS</small>
+            </div>
+          </article>
+
+          <article className="streak-card">
+            <Icon name="spark" size={34} />
+
+            <div>
+              <span className="pixel-label">CURRENT STREAK</span>
+              <strong>
+                {data.currentStreak} WEEKS
+              </strong>
+              <p>Keep building your plant-based habits.</p>
+            </div>
+          </article>
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
+          <article className="dashboard-card">
+            <div className="card-title">
+              <div>
+                <span className="pixel-label">IMPACT TRACKER</span>
+                <h2>
+                  {isProjected
+                    ? 'Your potential annual impact'
+                    : 'Your tracked impact'}
+                </h2>
+              </div>
+
+              <span className="estimate-label">
+                {isProjected ? 'PROJECTED' : 'CUMULATIVE'}
+              </span>
+            </div>
+
+            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+              <div>
+                <span className="pixel-label">CO₂e</span>
+                <h3 className="mt-2 text-3xl font-black">
+                  {formatCarbon(impact.co2eSaved)}
+                </h3>
+              </div>
+
+              <div>
+                <span className="pixel-label">WATER</span>
+                <h3 className="mt-2 text-3xl font-black">
+                  {formatWater(impact.waterSaved)}
+                </h3>
+              </div>
+
+              <div>
+                <span className="pixel-label">LAND</span>
+                <h3 className="mt-2 text-3xl font-black">
+                  {formatLand(impact.landSaved)}
+                </h3>
+              </div>
+
+              <div>
+                <span className="pixel-label">ANIMAL IMPACT</span>
+                <h3 className="mt-2 text-3xl font-black">
+                  {formatAnimals(impact.animalsSpared)}
+                </h3>
+              </div>
+            </div>
+
+            <div className="mt-6 border-t border-[#3F382F]/15 pt-5">
+              <span className="pixel-label">
+                {isProjected
+                  ? 'BASED ON YOUR SELECTED SWAPS'
+                  : 'BASED ON TRACKED PLANT-BASED DAYS'}
+              </span>
+
+              {!isProjected && (
+                <p className="mt-2 text-sm text-[#3F382F]/65">
+                  {data.cumulativeImpact.plantBasedDays} tracked
+                  plant-based days.
+                </p>
+              )}
+            </div>
+          </article>
+
+          <article className="dashboard-card">
+            <div className="card-title">
+              <div>
+                <span className="pixel-label">YOUR ACTIVITY</span>
+                <h2>Swap progress</h2>
+              </div>
+            </div>
+
+            <div className="mt-6 text-center">
+              <strong className="text-6xl font-black">
+                {data.selectedSwapCount}
+              </strong>
+
+              <p className="mt-2 text-[#3F382F]/65">
+                Currently selected swaps
+              </p>
+            </div>
+
+            <Link
+              href="/swaps"
+              className="pixel-button mt-7 flex justify-center"
+            >
+              Explore more swaps
+              <Icon name="arrow" />
+            </Link>
+          </article>
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <article className="dashboard-card">
+            <span className="pixel-label">PLANT-BASED PROGRESS</span>
+
+            <h2 className="mt-2 text-2xl font-black">
+              {data.cumulativeImpact.plantBasedDays} days
+            </h2>
+
+            <p className="mt-2 text-sm text-[#3F382F]/65">
+              Total tracked plant-based days.
+            </p>
+          </article>
+
+          <article className="dashboard-card">
+            <span className="pixel-label">YOUR NEXT STEP</span>
+
+            <h2 className="mt-2 text-2xl font-black">
+              Keep exploring alternatives
+            </h2>
+
+            <p className="mt-2 text-sm text-[#3F382F]/65">
+              Find another plant-based alternative that works for you.
+            </p>
+
+            <Link
+              href="/swaps"
+              className="mt-4 inline-flex items-center gap-2 font-bold underline"
+            >
+              Browse swaps <Icon name="arrow" />
+            </Link>
+          </article>
         </div>
       </div>
     </main>
@@ -1378,148 +1916,3 @@ export function LoginPage() {
 }
 
 
-export function DashboardPage() {
-  const [period, setPeriod] = useState('This month')
-  return (
-    <main className="page-shell">
-      <div className="mx-auto max-w-[1180px] px-5 py-12 lg:px-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="eyebrow">PLAYER DASHBOARD</span>
-            <h1 className="mt-2 text-4xl font-black sm:text-5xl">
-              WELCOME BACK, <span className="text-[#A8B99A]">MOO-MATICIAN.</span>
-            </h1>
-          </div>
-          <select
-            aria-label="Time period"
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="period-select"
-          >
-            <option>This month</option>
-            <option>Last month</option>
-            <option>All time</option>
-          </select>
-        </div>
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
-          <article className="dashboard-score">
-            <div>
-              <span className="pixel-label text-[#F5F0DF]/70">YOUR OPTIMIZATION SCORE</span>
-              <strong>3,480</strong>
-              <p>Top 18% of all planet pals</p>
-            </div>
-            <div className="level-badge">
-              <span>LEVEL</span>
-              <b>07</b>
-              <small>SPROUT SCOUT</small>
-            </div>
-          </article>
-          <article className="streak-card">
-            <Icon name="spark" size={34} />
-            <div>
-              <span className="pixel-label">CURRENT STREAK</span>
-              <strong>4 WEEKS</strong>
-              <p>Best: 6 weeks</p>
-            </div>
-          </article>
-        </div>
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
-          <article className="dashboard-card">
-            <div className="card-title">
-              <div>
-                <span className="pixel-label">IMPACT TRACKER</span>
-                <h2>Your progress</h2>
-              </div>
-              <span className="estimate-label">{period.toUpperCase()}</span>
-            </div>
-            <div className="chart-area">
-              <div className="chart-bars">
-                {[38, 50, 45, 66, 58, 80, 74, 92].map((h, i) => (
-                  <i key={i} style={{ height: `${h}%` }}>
-                    <b>{i === 7 ? '286' : ''}</b>
-                  </i>
-                ))}
-              </div>
-              <div className="chart-labels">
-                <span>W1</span>
-                <span>W2</span>
-                <span>W3</span>
-                <span>W4</span>
-                <span>NOW</span>
-              </div>
-            </div>
-            <div className="mini-stats">
-              <span>
-                <Icon name="leaf" />
-                <b>286 kg</b> CO₂e avoided
-              </span>
-              <span>
-                <Icon name="water" />
-                <b>28.4 kL</b> water saved
-              </span>
-              <span>
-                <Icon name="paw" />
-                <b>14</b> animals spared
-              </span>
-            </div>
-          </article>
-          <article className="dashboard-card">
-            <div className="card-title">
-              <div>
-                <span className="pixel-label">ACHIEVEMENTS</span>
-                <h2>Badge cabinet</h2>
-              </div>
-              <span>5 / 12</span>
-            </div>
-            <div className="badge-grid">
-              {[
-                ['trophy', 'Early Adopter'],
-                ['leaf', 'Leaf Legend'],
-                ['water', 'Water Wizard'],
-                ['spark', 'Swap Star'],
-                ['user', 'Herd Hero'],
-                ['lock', 'Locked'],
-              ].map(([icon, label], i) => (
-                <div key={label} className={i === 5 ? 'locked' : ''}>
-                  <i>
-                    <Icon name={icon as IconName} />
-                  </i>
-                  <span>{label}</span>
-                </div>
-              ))}
-            </div>
-          </article>
-        </div>
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <article className="referral-card">
-            <div>
-              <span className="pixel-label">GROW THE HERD</span>
-              <h2>Your referral pasture</h2>
-              <p>2 friends joined · 48 kg combined CO₂e avoided</p>
-              <button onClick={() => navigator.clipboard?.writeText('cowculator.app/join/MOOPAL7')}>
-                Copy invite link
-              </button>
-            </div>
-            <div className="qr" aria-label="Referral QR code">
-              <i />
-              <i />
-              <i />
-              <span>MOOPAL7</span>
-            </div>
-          </article>
-          <article className="next-swap">
-            <div className="swap-icon green">M→S</div>
-            <div>
-              <span className="pixel-label">NEXT RECOMMENDED SWAP</span>
-              <h2>Try oat milk twice this week</h2>
-              <p>Potential reward: +80 points</p>
-            </div>
-            <Link href="/swaps" aria-label="View swaps">
-              <Icon name="arrow" />
-            </Link>
-          </article>
-        </div>
-      </div>
-    </main>
-  )
-}

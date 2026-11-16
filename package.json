@@ -11,7 +11,7 @@
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
     "payload": "NODE_OPTIONS=--no-deprecation payload",
-    "seed:foods": "tsx src/seed/loadFoods.ts"
+    "seed:foods": "tsx loadfood.ts"
   },
   "dependencies": {
     "@neon/config": "^1.14.0",
@@ -23,6 +23,7 @@
     "@payloadcms/richtext-lexical": "4.0.0-beta.8",
     "@payloadcms/translations": "4.0.0-beta.8",
     "@payloadcms/ui": "4.0.0-beta.8",
+    "dotenv": "^18.0.10",
     "graphql": "^16.8.1",
     "html-react-parser": "^5.2.10",
     "monaco-editor": "0.55.1",

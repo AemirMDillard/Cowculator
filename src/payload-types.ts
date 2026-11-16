@@ -152,6 +152,7 @@ export interface Config {
     tags: Tag;
     foods: Food;
     swaps: Swap;
+    'swap-suggestions': SwapSuggestion;
     sources: Source;
     'impact-factors': ImpactFactor;
     leaderboard: Leaderboard;
@@ -170,6 +171,7 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     foods: FoodsSelect<false> | FoodsSelect<true>;
     swaps: SwapsSelect<false> | SwapsSelect<true>;
+    'swap-suggestions': SwapSuggestionsSelect<false> | SwapSuggestionsSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
     'impact-factors': ImpactFactorsSelect<false> | ImpactFactorsSelect<true>;
     leaderboard: LeaderboardSelect<false> | LeaderboardSelect<true>;
@@ -526,6 +528,9 @@ export interface Food {
   appearanceCharacteristics?: ('uniform' | 'mixed' | 'chunky' | 'textured')[] | null;
   temperatureOptions?: ('hot' | 'cold' | 'room_temperature')[] | null;
   sensoryConsiderations?: string | null;
+  impactGroup?:
+    | ('red_meat' | 'poultry' | 'fish' | 'shellfish' | 'milk' | 'cheese' | 'butter_cream' | 'yogurt' | 'eggs' | 'other')
+    | null;
   allergens?:
     ('soy' | 'wheat_gluten' | 'peanuts' | 'tree_nuts' | 'sesame' | 'milk' | 'eggs' | 'fish' | 'shellfish')[] | null;
   digestiveConsiderations?: ('high_fiber' | 'lactose' | 'fodmaps' | 'potential_discomfort')[] | null;
@@ -616,6 +621,37 @@ export interface Swap {
   sources?: (number | Source)[] | null;
   sortOrder?: number | null;
   isActive?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "swap-suggestions".
+ */
+export interface SwapSuggestion {
+  id: number;
+  foodBeingReplaced: number | Food;
+  suggestedAlternative: string;
+  notes?: string | null;
+  status?: ('pending' | 'approved' | 'rejected') | null;
   createdBy?:
     | ({
         relationTo: 'admins';
@@ -770,6 +806,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'swaps';
         value: number | Swap;
+      } | null)
+    | ({
+        relationTo: 'swap-suggestions';
+        value: number | SwapSuggestion;
       } | null)
     | ({
         relationTo: 'sources';
@@ -1044,6 +1084,7 @@ export interface FoodsSelect<T extends boolean = true> {
   appearanceCharacteristics?: T;
   temperatureOptions?: T;
   sensoryConsiderations?: T;
+  impactGroup?: T;
   allergens?: T;
   digestiveConsiderations?: T;
   nutritionalCautions?: T;
@@ -1077,6 +1118,20 @@ export interface SwapsSelect<T extends boolean = true> {
   sources?: T;
   sortOrder?: T;
   isActive?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "swap-suggestions_select".
+ */
+export interface SwapSuggestionsSelect<T extends boolean = true> {
+  foodBeingReplaced?: T;
+  suggestedAlternative?: T;
+  notes?: T;
+  status?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1247,6 +1302,7 @@ export interface CollectionQueryWidget {
       | 'tags'
       | 'foods'
       | 'swaps'
+      | 'swap-suggestions'
       | 'sources'
       | 'impact-factors'
       | 'leaderboard';
@@ -1280,6 +1336,7 @@ export interface ActivityWidget {
           | 'tags'
           | 'foods'
           | 'swaps'
+          | 'swap-suggestions'
           | 'sources'
           | 'impact-factors'
           | 'leaderboard'

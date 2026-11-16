@@ -1,5 +1,5 @@
-import { SwapsPage } from '@/components/cowculator'
+import { SwapsClient } from './SwapsClient'
 
 export default function Page() {
-  return <SwapsPage />
+  return <SwapsClient />
 }

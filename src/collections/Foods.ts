@@ -240,6 +240,23 @@ export const Foods: CollectionConfig = {
       label: 'Additional sensory notes',
     },
 
+    {
+      name: 'impactGroup',
+      type: 'select',
+      options: [
+        { label: 'Red meat', value: 'red_meat' },
+        { label: 'Poultry', value: 'poultry' },
+        { label: 'Fish', value: 'fish' },
+        { label: 'Shellfish', value: 'shellfish' },
+        { label: 'Milk', value: 'milk' },
+        { label: 'Cheese', value: 'cheese' },
+        { label: 'Butter and cream', value: 'butter_cream' },
+        { label: 'Yogurt', value: 'yogurt' },
+        { label: 'Eggs', value: 'eggs' },
+        { label: 'Other', value: 'other' },
+      ],
+    },
+
     // Accessibility and dietary considerations
     {
       name: 'allergens',

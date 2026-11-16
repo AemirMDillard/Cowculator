@@ -15,6 +15,7 @@ import { Swaps } from './collections/Swaps'
 import { Sources } from './collections/Sources'
 import { Leaderboard } from './collections/Leaderboard'
 import { ImpactFactors } from './collections/ImpactFactors'
+import { SwapSuggestions } from './collections/SwapSuggestions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,7 +45,7 @@ export default buildConfig({
     fallbackLanguage: 'en',
     supportedLanguages: { en: adminLanguage },
   },
-  collections: [Admins, Users, Media, Folders, Tags, Foods, Swaps, Sources, ImpactFactors, Leaderboard],
+  collections: [Admins, Users, Media, Folders, Tags, Foods, Swaps, SwapSuggestions, Sources, ImpactFactors, Leaderboard],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
