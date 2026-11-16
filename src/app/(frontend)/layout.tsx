@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
               strategy="afterInteractive"
             />
-            <Script id="figma-google-analytics" strategy="afterInteractive">
+            <Script id="cowculator-google-analytics" strategy="afterInteractive">
               {`
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
