@@ -154,6 +154,11 @@ export interface Config {
     sources: Source;
     leaderboard: Leaderboard;
     friendships: Friendship;
+    'community-posts': CommunityPost;
+    'community-comments': CommunityComment;
+    'community-reactions': CommunityReaction;
+    'community-reports': CommunityReport;
+    'community-blocks': CommunityBlock;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -171,6 +176,11 @@ export interface Config {
     sources: SourcesSelect<false> | SourcesSelect<true>;
     leaderboard: LeaderboardSelect<false> | LeaderboardSelect<true>;
     friendships: FriendshipsSelect<false> | FriendshipsSelect<true>;
+    'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
+    'community-comments': CommunityCommentsSelect<false> | CommunityCommentsSelect<true>;
+    'community-reactions': CommunityReactionsSelect<false> | CommunityReactionsSelect<true>;
+    'community-reports': CommunityReportsSelect<false> | CommunityReportsSelect<true>;
+    'community-blocks': CommunityBlocksSelect<false> | CommunityBlocksSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -289,6 +299,7 @@ export interface User {
   wantsMealPlan?: boolean | null;
   referralCode?: string | null;
   referralCodeUsed?: string | null;
+  communityAgeConfirmedAt?: string | null;
   dietType?: ('vegan' | 'vegetarian' | 'pescatarian' | 'omnivore' | 'other' | 'not_sure') | null;
   plantBasedGoalDaysPerWeek?: number | null;
   activeSwaps?:
@@ -740,6 +751,169 @@ export interface Friendship {
   createdAt: string;
 }
 /**
+ * Text-only posts shared with signed-in Cowculator members.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-posts".
+ */
+export interface CommunityPost {
+  id: number;
+  author: number | User;
+  content: string;
+  status: 'published' | 'hidden' | 'deleted';
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Text-only comments on community posts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-comments".
+ */
+export interface CommunityComment {
+  id: number;
+  post: number | CommunityPost;
+  author: number | User;
+  content: string;
+  status: 'published' | 'hidden' | 'deleted';
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-reactions".
+ */
+export interface CommunityReaction {
+  id: number;
+  post: number | CommunityPost;
+  author: number | User;
+  reaction: 'support' | 'heart' | 'leaf';
+  reactionKey: string;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Member reports for moderator review.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-reports".
+ */
+export interface CommunityReport {
+  id: number;
+  reporter: number | User;
+  post?: (number | null) | CommunityPost;
+  comment?: (number | null) | CommunityComment;
+  reason: 'harassment' | 'hate' | 'personal-information' | 'spam' | 'other';
+  details?: string | null;
+  reportKey: string;
+  status: 'open' | 'under-review' | 'resolved' | 'dismissed';
+  adminNotes?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-blocks".
+ */
+export interface CommunityBlock {
+  id: number;
+  blocker: number | User;
+  blocked: number | User;
+  blockKey: string;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -798,6 +972,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'friendships';
         value: number | Friendship;
+      } | null)
+    | ({
+        relationTo: 'community-posts';
+        value: number | CommunityPost;
+      } | null)
+    | ({
+        relationTo: 'community-comments';
+        value: number | CommunityComment;
+      } | null)
+    | ({
+        relationTo: 'community-reactions';
+        value: number | CommunityReaction;
+      } | null)
+    | ({
+        relationTo: 'community-reports';
+        value: number | CommunityReport;
+      } | null)
+    | ({
+        relationTo: 'community-blocks';
+        value: number | CommunityBlock;
       } | null);
   globalSlug?: string | null;
   user:
@@ -919,6 +1113,7 @@ export interface UsersSelect<T extends boolean = true> {
   wantsMealPlan?: T;
   referralCode?: T;
   referralCodeUsed?: T;
+  communityAgeConfirmedAt?: T;
   dietType?: T;
   plantBasedGoalDaysPerWeek?: T;
   activeSwaps?: T;
@@ -1144,6 +1339,78 @@ export interface FriendshipsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-posts_select".
+ */
+export interface CommunityPostsSelect<T extends boolean = true> {
+  author?: T;
+  content?: T;
+  status?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-comments_select".
+ */
+export interface CommunityCommentsSelect<T extends boolean = true> {
+  post?: T;
+  author?: T;
+  content?: T;
+  status?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-reactions_select".
+ */
+export interface CommunityReactionsSelect<T extends boolean = true> {
+  post?: T;
+  author?: T;
+  reaction?: T;
+  reactionKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-reports_select".
+ */
+export interface CommunityReportsSelect<T extends boolean = true> {
+  reporter?: T;
+  post?: T;
+  comment?: T;
+  reason?: T;
+  details?: T;
+  reportKey?: T;
+  status?: T;
+  adminNotes?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-blocks_select".
+ */
+export interface CommunityBlocksSelect<T extends boolean = true> {
+  blocker?: T;
+  blocked?: T;
+  blockKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1226,7 +1493,20 @@ export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
     relatedCollection:
-      'admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard' | 'friendships';
+      | 'admins'
+      | 'users'
+      | 'media'
+      | 'folders'
+      | 'tags'
+      | 'foods'
+      | 'sources'
+      | 'leaderboard'
+      | 'friendships'
+      | 'community-posts'
+      | 'community-comments'
+      | 'community-reactions'
+      | 'community-reports'
+      | 'community-blocks';
     where?:
       | {
           [k: string]: unknown;
@@ -1249,7 +1529,22 @@ export interface CollectionQueryWidget {
 export interface ActivityWidget {
   data?: {
     excludedCollections?:
-      | ('admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard' | 'friendships')[]
+      | (
+          | 'admins'
+          | 'users'
+          | 'media'
+          | 'folders'
+          | 'tags'
+          | 'foods'
+          | 'sources'
+          | 'leaderboard'
+          | 'friendships'
+          | 'community-posts'
+          | 'community-comments'
+          | 'community-reactions'
+          | 'community-reports'
+          | 'community-blocks'
+        )[]
       | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';

@@ -171,6 +171,19 @@ export const Users: CollectionConfig = {
         hidden: true,
       },
     },
+    {
+      name: 'communityAgeConfirmedAt',
+      type: 'date',
+      label: 'Community age confirmation',
+      access: {
+        read: isAdmin,
+        create: () => false,
+        update: () => false,
+      },
+      admin: {
+        hidden: true,
+      },
+    },
 
     // CURRENT HABITS
     {

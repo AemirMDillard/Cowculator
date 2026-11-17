@@ -9,6 +9,7 @@ import { Icon, PixelLogo } from './shared'
 const nav = [
   ['How it works', '/#how-it-works'],
   ['Swaps', '/swaps'],
+  ['Community', '/community'],
   ['Friends', '/friends'],
   ['Leaderboard', '/leaderboard'],
   ['My impact', '/dashboard'],
@@ -125,6 +126,13 @@ export function SiteHeader() {
                     onClick={() => setAccountMenuOpen(false)}
                   >
                     Friends
+                  </Link>
+                  <Link
+                    href="/community"
+                    className="block px-3 py-2 text-sm font-bold text-[#3F382F] hover:bg-[#A8B99A]/25"
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    Community
                   </Link>
                   <Link
                     href="/dashboard"
@@ -279,6 +287,7 @@ export function SiteFooter() {
             <Link href="/calculator">Cowculate impact</Link>
             <Link href="/swaps">Sustainable swaps</Link>
             <Link href="/leaderboard">Leaderboard</Link>
+            <Link href="/community">Community</Link>
             <Link href="/friends">Find friends</Link>
             <Link href="/journey">Plant-based journey</Link>
             <Link href="/settings">Settings</Link>

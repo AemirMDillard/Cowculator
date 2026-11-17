@@ -13,6 +13,11 @@ import { Foods } from './collections/Foods'
 import { Sources } from './collections/Sources'
 import { Leaderboard } from './collections/Leaderboard'
 import { Friendships } from './collections/Friendships'
+import { CommunityPosts } from './collections/CommunityPosts'
+import { CommunityComments } from './collections/CommunityComments'
+import { CommunityReactions } from './collections/CommunityReactions'
+import { CommunityReports } from './collections/CommunityReports'
+import { CommunityBlocks } from './collections/CommunityBlocks'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -42,7 +47,22 @@ export default buildConfig({
     fallbackLanguage: 'en',
     supportedLanguages: { en: adminLanguage },
   },
-  collections: [Admins, Users, Media, Folders, Tags, Foods, Sources, Leaderboard, Friendships],
+  collections: [
+    Admins,
+    Users,
+    Media,
+    Folders,
+    Tags,
+    Foods,
+    Sources,
+    Leaderboard,
+    Friendships,
+    CommunityPosts,
+    CommunityComments,
+    CommunityReactions,
+    CommunityReports,
+    CommunityBlocks,
+  ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

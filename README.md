@@ -41,14 +41,14 @@ The site runs at `http://localhost:3000`; the Payload admin is at `/admin`.
 
 ## Useful commands
 
-| Purpose | Command |
-| --- | --- |
-| Start development server | `corepack pnpm dev` |
-| Type-check | `corepack pnpm typecheck` |
-| Run unit tests | `corepack pnpm test` |
-| Check formatting | `corepack pnpm exec oxfmt --check <files...>` |
-| Format files | `corepack pnpm exec oxfmt <files...>` |
-| Production build | `corepack pnpm build` |
+| Purpose                  | Command                                       |
+| ------------------------ | --------------------------------------------- |
+| Start development server | `corepack pnpm dev`                           |
+| Type-check               | `corepack pnpm typecheck`                     |
+| Run unit tests           | `corepack pnpm test`                          |
+| Check formatting         | `corepack pnpm exec oxfmt --check <files...>` |
+| Format files             | `corepack pnpm exec oxfmt <files...>`         |
+| Production build         | `corepack pnpm build`                         |
 
 The production build fails on TypeScript errors, and CI runs the type-check, unit tests, and build. The standalone build can use significant disk space.
 
@@ -73,18 +73,19 @@ Prefer the existing feature modules in `src/components/cowculator/` over growing
 
 ## Main website routes
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Welcome page and paths into Cowculator |
-| `/calculator` | Food-habit questionnaire |
-| `/results` | Results from the questionnaire |
-| `/swaps` | Animal-food and plant-food comparisons |
-| `/dashboard` | Impact, points, current swaps, referrals, and progress |
-| `/journey` | Plant-based pledge and self-reported habit tracking |
-| `/friends` | Friend search and connections |
-| `/leaderboard` | Monthly and community rankings |
-| `/settings` | Theme and username preferences |
-| `/login`, `/signup` | Payload-backed account flows |
+| Route                  | Purpose                                                              |
+| ---------------------- | -------------------------------------------------------------------- |
+| `/`                    | Welcome page and paths into Cowculator                               |
+| `/calculator`          | Food-habit questionnaire                                             |
+| `/results`             | Results from the questionnaire                                       |
+| `/swaps`               | Animal-food and plant-food comparisons                               |
+| `/dashboard`           | Impact, points, current swaps, referrals, and progress               |
+| `/journey`             | Plant-based pledge and self-reported habit tracking                  |
+| `/friends`             | Friend search and connections                                        |
+| `/community`           | Member-only, text-based posts and discussion                         |
+| `/leaderboard`         | Monthly and community rankings                                       |
+| `/settings`            | Theme and username preferences                                       |
+| `/login`, `/signup`    | Payload-backed account flows                                         |
 | `/plant-a-seed/<code>` | Friendly referral URL; redirects to signup with referral attribution |
 
 New referral URLs use `/plant-a-seed/<code>`. The older `/signup?ref=<code>` format remains supported.
@@ -97,6 +98,7 @@ New referral URLs use `/plant-a-seed/<code>`. The older `/signup?ref=<code>` for
 - `/api/leaderboard` — community rankings.
 - `/api/referrals` — invite URL/QR data, referral points, and vegan-signup tally.
 - `/api/friends` and `/api/friends/requests/...` — friend search and requests.
+- `/api/community/...` — member-only posts, comments, reactions, reports, blocks, and age confirmation.
 - `/api/journey` — authenticated plant-based pledge and check-ins.
 - `/api/profile` — profile name reads/updates and immediate leaderboard-name synchronization.
 - `/api/users/...` — Payload's authentication endpoints.
@@ -129,6 +131,16 @@ Use [`src/lib/api-session.ts`](./src/lib/api-session.ts) for route authenticatio
 - Referral points and the vegan-signup tally are separate metrics. A signup alone does not grant swap points.
 - User profile names are also shown in friend search and leaderboard records. Update the leaderboard's stored display names when a profile name changes.
 
+### Community and moderation
+
+- Community posts are visible only to signed-in members, are not included in public pages, and are served through authenticated, no-store API routes.
+- Feed and comment pages use bounded cursor pagination. Post, comment, reaction, report, and block writes are validated and rate-limited in PostgreSQL.
+- Posts and comments are plain text. The API limits post length to 1,000 characters and comment length to 500; React renders content as text rather than HTML.
+- Community collections are admin-only in Payload. User-facing routes perform session, ownership, age-confirmation, and block checks before using privileged Payload or SQL operations.
+- Reports are stored in the `Community Reports` admin collection for manual review. Moderators can hide posts and comments there; members can report content, block people, and manage their own block list.
+- Community access requires a self-confirmation that a member is at least 13. Only the confirmation timestamp is stored, not a birth date; this does not verify age. There are no direct messages or media uploads in this first release.
+- Do not describe the feed as ready for minors in production until Cowculator has an age-assurance, moderation-response, privacy, and jurisdiction-specific safeguarding plan.
+
 ### Browser storage and themes
 
 - `cowculator-swaps` and `cowculator-answers` are user-specific local caches. Clear them on logout and before a successful login can reuse guest data.
@@ -137,7 +149,7 @@ Use [`src/lib/api-session.ts`](./src/lib/api-session.ts) for route authenticatio
 
 ## Payload and database safety
 
-Collections are defined in `src/collections/` and registered in `src/payload.config.ts`. The current model includes users, foods, sources, leaderboards, and friendships.
+Collections are defined in `src/collections/` and registered in `src/payload.config.ts`. The current model includes users, foods, sources, leaderboards, friendships, and community content/moderation records.
 
 Treat database changes carefully:
 
