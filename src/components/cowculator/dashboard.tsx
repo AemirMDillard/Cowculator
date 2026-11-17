@@ -265,12 +265,13 @@ export function DashboardPage() {
                       ? data.estimateBasis === 'per-100g'
                         ? 'ONE COMPARISON PER 100 G'
                         : 'RECORDED GRAM PORTION PER REPORTED OCCASION'
-                      : 'BASED ON TRACKED PLANT-BASED DAYS'}
+                      : 'STORED CUMULATIVE ESTIMATE'}
                   </span>
 
                   {!isProjected && (
                     <p className="mt-2 text-sm text-[#3F382F]/65">
-                      {data.cumulativeImpact.plantBasedDays} tracked plant-based days.
+                      Self-reported plant-based check-ins are tracked separately and do not
+                      calculate these environmental estimates.
                     </p>
                   )}
                 </div>
@@ -291,7 +292,10 @@ export function DashboardPage() {
               {data.cumulativeImpact.plantBasedDays} days
             </h2>
 
-            <p className="mt-2 text-sm text-[#3F382F]/65">Total tracked plant-based days.</p>
+            <p className="mt-2 text-sm text-[#3F382F]/65">
+              Days you checked in on your plant-based journey. This is self-reported progress, not
+              an emissions estimate.
+            </p>
           </article>
         </div>
 

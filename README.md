@@ -44,13 +44,13 @@ The site runs at `http://localhost:3000`; the Payload admin is at `/admin`.
 | Purpose | Command |
 | --- | --- |
 | Start development server | `corepack pnpm dev` |
-| Type-check | `corepack pnpm exec tsc --noEmit` |
-| Run impact-calculation tests | `corepack pnpm exec tsx --test src/lib/impact-calculations.test.ts` |
+| Type-check | `corepack pnpm typecheck` |
+| Run unit tests | `corepack pnpm test` |
 | Check formatting | `corepack pnpm exec oxfmt --check <files...>` |
 | Format files | `corepack pnpm exec oxfmt <files...>` |
 | Production build | `corepack pnpm build` |
 
-`next.config.ts` currently tells Next.js to ignore TypeScript build errors. **Always run the type-check separately**; a successful production build alone is not a type-safety check. The standalone build can use significant disk space.
+The production build fails on TypeScript errors, and CI runs the type-check, unit tests, and build. The standalone build can use significant disk space.
 
 ## Where things live
 
@@ -118,6 +118,7 @@ Use [`src/lib/api-session.ts`](./src/lib/api-session.ts) for route authenticatio
 - Weekly goals use the existing `plantBasedGoalDaysPerWeek` user field.
 - Pledge dates and self-reported check-ins are stored under the reserved `quizResponses.__cowculator.plantBasedJourney` JSON key. This avoids a schema change; preserve this metadata when changing quiz-answer handling.
 - Journey check-ins represent a person's reported habits. They are not verified emissions reductions and should not be silently converted into environmental impact or leaderboard points.
+- The dashboard's tracked-day count is derived from unique saved check-in dates; it is separate from environmental impact totals.
 - Keep the tracker encouraging and compact: realistic goals, clear weekly progress, and no guilt-based language.
 
 ### Referrals and friends
@@ -154,6 +155,7 @@ The journey and referral snapshots currently reuse existing JSON fields and ther
 - Prioritize responsive, concise layouts. Prefer compact cards and grids over long walls of text.
 - Reuse existing typography, controls, theme variables, and components where possible.
 - Keep form controls labeled and keyboard accessible; use visible focus styles and clear loading, success, and error states.
+- Keep the keyboard skip link enabled by default and respect reduced-motion preferences.
 - Keep Server Components free of browser event handlers. Put interactive behavior in Client Components.
 - Do not add a dependency for a small UI detail or duplicate an existing helper.
 - Preserve existing account, guest, vegan, referral, and mobile behavior when changing shared components.

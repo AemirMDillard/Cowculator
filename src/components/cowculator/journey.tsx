@@ -188,11 +188,15 @@ export function JourneyPage() {
               <span className="pixel-label">YOUR NEXT CHAPTER</span>
               <h2 className="mt-2 text-2xl font-black">Make it your journey</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-[#3F382F]/70">
-                Create a free account to make your pledge and keep your daily progress in one place.
+                Explore ideas without an account. Create a free account only when you want to save
+                your pledge and check-ins.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
+                <Link href="/swaps" className="pixel-button secondary">
+                  Explore food swaps
+                </Link>
                 <Link href="/signup?next=%2Fjourney" className="pixel-button">
-                  Join the journey
+                  Save my journey
                 </Link>
                 <Link href="/login?next=%2Fjourney" className="pixel-button secondary">
                   Log in
@@ -424,6 +428,70 @@ export function JourneyPage() {
             Cows, chickens, and the planet are cheering you on.
           </p>
         )}
+
+        <section className="mt-8 grid gap-4 md:grid-cols-2" aria-label="Learning and community">
+          <article className="dashboard-card">
+            <span className="pixel-label">LEARN AT YOUR PACE</span>
+            <h2 className="mt-2 text-xl font-black">Plant-based basics, from trusted sources</h2>
+            <p className="mt-2 text-sm leading-6 text-[#3F382F]/70">
+              General nutrition guidance can help you plan balanced meals. Individual needs vary;
+              ask a qualified clinician or registered dietitian for personal advice.
+            </p>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <a
+                  href="https://www.nhs.uk/live-well/eat-well/how-to-eat-a-balanced-diet/the-vegan-diet/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-bold underline underline-offset-2"
+                >
+                  NHS: The vegan diet
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.bda.uk.com/resource/vegetarian-vegan-plant-based-diet.html"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-bold underline underline-offset-2"
+                >
+                  British Dietetic Association: vegetarian and vegan diets
+                </a>
+              </li>
+            </ul>
+          </article>
+
+          <article className="dashboard-card">
+            <span className="pixel-label">BETTER TOGETHER</span>
+            <h2 className="mt-2 text-xl font-black">Find people who support your choices</h2>
+            <p className="mt-2 text-sm leading-6 text-[#3F382F]/70">
+              {authRequired
+                ? 'A free account lets you find friends and share an invite. Your journey check-ins stay private.'
+                : 'Search for friends, compare optional monthly game points, or share an invite. Your check-ins are personal and are not posted to the leaderboard.'}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {authRequired ? (
+                <>
+                  <Link href="/signup?next=%2Fjourney" className="pixel-button small">
+                    Create an account
+                  </Link>
+                  <Link href="/login?next=%2Fjourney" className="pixel-button small secondary">
+                    Log in
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/friends" className="pixel-button small">
+                    Find friends
+                  </Link>
+                  <Link href="/dashboard" className="pixel-button small secondary">
+                    Invite a friend
+                  </Link>
+                </>
+              )}
+            </div>
+          </article>
+        </section>
       </div>
     </main>
   )

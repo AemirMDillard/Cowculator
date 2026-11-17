@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const language = sanitizeHtmlAttribute(makeSiteSettings.language) || 'en'
-  const addBypassLinks = makeSiteSettings.accessibility?.addBypassLinks === true
+  const addBypassLinks = makeSiteSettings.accessibility?.addBypassLinks !== false
   const customScripts = makeSiteSettings.customScripts
 
   return (

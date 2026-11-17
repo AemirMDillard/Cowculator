@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getUserSession } from '@/lib/api-session'
 import { isRecord } from '@/lib/guards'
 import { numberOrZero } from '@/lib/numbers'
+import { getJourneyProgress } from '@/lib/plant-based-journey'
 import {
   calculatePer100gImpact,
   calculateProjectedImpact,
@@ -75,6 +76,7 @@ export async function GET(request: Request) {
         })
       : { docs: [] }
     const quizResponses = userRecord.quizResponses
+    const journey = getJourneyProgress(quizResponses)
     const isVegan = isFullyPlantBased(quizResponses)
     const hasFrequencies = hasAnimalFrequencyAnswers(quizResponses)
     const impactResult = isVegan
@@ -89,7 +91,7 @@ export async function GET(request: Request) {
 
     const cumulativeImpact = {
       ...getImpactValues(userRecord.cumulativeImpact),
-      plantBasedDays: numberOrZero(userRecord.cumulativeImpact?.plantBasedDays),
+      plantBasedDays: journey.checkInDates.length,
     }
 
     // Use the latest monthly leaderboard score if one exists.

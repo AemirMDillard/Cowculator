@@ -1,4 +1,3 @@
-
 import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
 import path from 'path'
@@ -21,9 +20,6 @@ const nextConfig: NextConfig = {
     root: path.resolve(dirname),
   },
   output: 'standalone',
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   enablePrerenderSourceMaps: false,
   experimental: {
     cpus: 2,
