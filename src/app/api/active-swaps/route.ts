@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -10,125 +9,93 @@ type Choice =
   | { type: 'give-up' }
   | { type: 'custom'; suggestion: string; notes?: string }
 
-function isValidChoice(value: unknown): value is Choice {
-  if (!value || typeof value !== 'object') return false
-
-  const choice = value as Record<string, unknown>
-
-  if (choice.type === 'give-up') return true
-
-  if (choice.type === 'alternative') {
-    return (
-      typeof choice.foodId === 'string' &&
-      typeof choice.swapId === 'string'
-    )
-  }
-
-  if (choice.type === 'custom') {
-    return (
-      typeof choice.suggestion === 'string' &&
-      (choice.notes === undefined || typeof choice.notes === 'string')
-    )
-  }
-
-  return false
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-async function authenticate(request: Request) {
-  const payload = await getPayload({ config })
+function isChoice(value: unknown): value is Choice {
+  if (!isRecord(value)) return false
 
-  const { user } = await payload.auth({
-    headers: request.headers,
-  })
+  if (value.type === 'give-up') return true
 
-  if (!user || user.collection !== 'users') {
-    return { payload, user: null }
+  if (value.type === 'alternative') {
+    return typeof value.foodId === 'string' &&
+      typeof value.swapId === 'string'
   }
+
+  return value.type === 'custom' &&
+    typeof value.suggestion === 'string' &&
+    (value.notes === undefined || typeof value.notes === 'string')
+}
+
+function isChoices(value: unknown): value is Record<string, Choice> {
+  return isRecord(value) && Object.values(value).every(isChoice)
+}
+
+async function getUser(request: Request) {
+  const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: request.headers })
+
+  if (!user || user.collection !== 'users') return null
 
   return { payload, user }
 }
 
 export async function GET(request: Request) {
   try {
-    const { payload, user } = await authenticate(request)
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'You must be logged in.' },
-        { status: 401 }
-      )
+    const session = await getUser(request)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const record = await payload.findByID({
+    const record = await session.payload.findByID({
       collection: 'users',
-      id: user.id,
+      id: session.user.id,
       depth: 0,
       overrideAccess: true,
     })
 
-    return NextResponse.json({
-      activeSwaps: record.activeSwaps ?? {},
-    })
+    return NextResponse.json(
+      { activeSwaps: isChoices(record.activeSwaps) ? record.activeSwaps : {} },
+      { headers: { 'Cache-Control': 'no-store' } },
+    )
   } catch (error) {
     console.error('GET /api/active-swaps:', error)
-
     return NextResponse.json(
       { error: 'Unable to load saved swaps.' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    const { payload, user } = await authenticate(request)
+    const session = await getUser(request)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (!user) {
+    const body: unknown = await request.json()
+    if (!isRecord(body) || !isChoices(body.activeSwaps)) {
       return NextResponse.json(
-        { error: 'You must be logged in.' },
-        { status: 401 }
+        { error: 'Invalid activeSwaps data.' },
+        { status: 400 },
       )
     }
 
-    const body = await request.json()
-
-    if (
-      !body.activeSwaps ||
-      typeof body.activeSwaps !== 'object' ||
-      Array.isArray(body.activeSwaps)
-    ) {
-      return NextResponse.json(
-        { error: 'Invalid swaps data.' },
-        { status: 400 }
-      )
-    }
-
-    const activeSwaps = Object.fromEntries(
-      Object.entries(body.activeSwaps).filter(
-        ([foodId, choice]) =>
-          Boolean(foodId) && isValidChoice(choice)
-      )
-    )
-
-    await payload.update({
+    await session.payload.update({
       collection: 'users',
-      id: user.id,
-      data: {
-        activeSwaps,
-      },
+      id: session.user.id,
+      data: { activeSwaps: body.activeSwaps },
       overrideAccess: true,
     })
 
-    return NextResponse.json({
-      success: true,
-      activeSwaps,
-    })
+    return NextResponse.json({ activeSwaps: body.activeSwaps })
   } catch (error) {
     console.error('PATCH /api/active-swaps:', error)
-
     return NextResponse.json(
       { error: 'Unable to save swaps.' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

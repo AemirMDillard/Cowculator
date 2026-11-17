@@ -5,61 +5,33 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 
 type Food = {
-  id: string
+  id: number | string
   name: string
   foodOrigin: string
-  foodCategory: string
-  animalProductCategory?: string
-  impactGroup?: string
-  environmentalScore?: number
-  cost?: number
-  costPerServing?: number
-  protein?: number
-  nutritionPer100g?: {
-    protein?: number
-  }
-  description?: string
+  swapCategory: string
+  animalProductCategory?: string | null
+  isActive?: boolean | null
+  nutrition?: { proteinG?: number | null }
+  pricing?: { avgCostPer100g?: number | null }
+  environmentalImpact?: { impactScorePer100g?: number | null }
 }
 
-type Swap = {
-  id: string
-  name: string
-  description?: string
-  replaces: Food[]
-  alternativeFoods: Food[]
-  nutritionalNotes?: string
-  sensoryMatchNotes?: string
-  recommendationNotes?: string
+type Alternative = { food: Food; swapId: string }
+
+type Group = {
+  food: Food
+  alternatives: Alternative[]
 }
+
 
 type Choice =
   | { type: 'alternative'; foodId: string; swapId: string }
   | { type: 'give-up' }
   | { type: 'custom'; suggestion: string; notes?: string }
 
-type Group = {
-  food: Food
-  alternatives: {
-    food: Food
-    swap: Swap
-  }[]
-}
-
-const POINTS_PER_SWAP = 10
-
 const questionForCategory: Record<string, string> = {
   beef: 'redMeat',
   pork: 'redMeat',
-  poultry: 'poultry',
-  fish: 'seafood',
-  seafood: 'seafood',
-  dairy: 'dairy',
-  eggs: 'eggs',
-}
-
-const fallbackImpactGroup: Record<string, string> = {
-  beef: 'red_meat',
-  pork: 'red_meat',
   poultry: 'poultry',
   fish: 'seafood',
   seafood: 'seafood',
@@ -90,51 +62,29 @@ function isRelevant(
   )
 }
 
-function getImpactGroup(food: Food) {
-  if (food.impactGroup) return food.impactGroup
-
-  const name = food.name.toLowerCase()
-
-  if (food.animalProductCategory === 'dairy') {
-    if (
-      name.includes('casein') ||
-      name.includes('whey') ||
-      name.includes('protein powder')
-    ) {
-      return 'dairy_protein'
-    }
-
-    if (name.includes('milk')) return 'milk'
-    if (name.includes('cheese')) return 'cheese'
-    if (name.includes('yogurt') || name.includes('yoghurt')) {
-      return 'yogurt'
-    }
-    if (name.includes('butter')) return 'butter'
-
-    return 'other_dairy'
-  }
-
-  return (
-    fallbackImpactGroup[food.animalProductCategory || ''] ||
-    food.animalProductCategory ||
-    food.foodCategory
-  )
-}
 
 function getProtein(food: Food) {
-  return food.protein ?? food.nutritionPer100g?.protein
+  return food.nutrition?.proteinG ?? null
 }
 
-function formatMoney(value?: number) {
+function getOptimizationPoints(animal: Food, alternative: Food) {
+  const animalScore = animal.environmentalImpact?.impactScorePer100g 
+  const alternativeScore = alternative.environmentalImpact?.impactScorePer100g
+
+  if (animalScore == null || alternativeScore == null) return 0
+
+  return Math.max(0, Number((animalScore - alternativeScore).toFixed(2)))
+}
+
+function formatMoney(value?: number | null) {
   if (value === undefined || value === null) return null
   return `$${value.toFixed(2)}`
 }
 
 export function SwapsClient() {
-  const [swaps, setSwaps] = useState<Swap[]>([])
+  const [foods, setFoods] = useState<Food[]>([])
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [choices, setChoices] = useState<Record<string, Choice>>({})
-  const [pointsEarned, setPointsEarned] = useState<Record<string, number>>({})
   const [expandedFoods, setExpandedFoods] = useState<string[]>([])
   const [customText, setCustomText] = useState<Record<string, string>>({})
   const [customNotes, setCustomNotes] = useState<Record<string, string>>({})
@@ -152,7 +102,6 @@ export function SwapsClient() {
     try {
       const savedAnswers = localStorage.getItem('cowculator-answers')
       const savedChoices = localStorage.getItem('cowculator-swaps')
-      const savedPoints = localStorage.getItem('cowculator-points-earned')
 
       if (savedAnswers) {
         setAnswers(JSON.parse(savedAnswers))
@@ -171,50 +120,20 @@ export function SwapsClient() {
         }
       }
 
-      if (savedPoints) {
-        setPointsEarned(JSON.parse(savedPoints))
-      } else if (savedChoices) {
-        const parsed = JSON.parse(savedChoices)
-
-        if (
-          parsed &&
-          typeof parsed === 'object' &&
-          !Array.isArray(parsed)
-        ) {
-          const initialPoints: Record<string, number> = {}
-
-          for (const [foodId, choice] of Object.entries(parsed)) {
-            if (
-              choice &&
-              typeof choice === 'object' &&
-              (choice as Choice).type === 'alternative'
-            ) {
-              initialPoints[foodId] = POINTS_PER_SWAP
-            }
-          }
-
-          setPointsEarned(initialPoints)
-        }
-      }
-    } catch (error) {
-      console.error('Could not load local choices:', error)
-    }
 
     async function loadSwaps() {
       try {
-        const [swapsResponse, savedResponse] = await Promise.all([
-          fetch(
-            '/api/swaps?where[isActive][equals]=true&depth=2&limit=100'
-          ),
+        const [foodsResponse, savedResponse] = await Promise.all([
+          fetch('/api/foods'),
           fetch('/api/active-swaps'),
         ])
 
-        if (!swapsResponse.ok) {
-          throw new Error('Could not load swaps.')
+        if (!foodsResponse.ok) {
+          throw new Error('Could not load foods.')
         }
 
-        const swapsData = await swapsResponse.json()
-        setSwaps(swapsData.docs ?? [])
+        const foodsData = await foodsResponse.json()
+        setFoods(foodsData.docs ?? [])
 
         if (savedResponse.ok) {
   const savedData = await savedResponse.json()
@@ -231,23 +150,6 @@ export function SwapsClient() {
       'cowculator-swaps',
       JSON.stringify(savedChoices)
     )
-
-    const restoredPoints: Record<string, number> = {}
-
-    for (const [foodId, choice] of Object.entries(savedChoices)) {
-      if (
-        choice &&
-        typeof choice === 'object' &&
-        (choice as Choice).type === 'alternative'
-      ) {
-        restoredPoints[foodId] = POINTS_PER_SWAP
-      }
-    }
-
-    setPointsEarned(previous => ({
-      ...previous,
-      ...restoredPoints,
-    }))
   }
 } else if (savedResponse.status !== 401) {
   const errorBody = await savedResponse.text()
@@ -269,127 +171,119 @@ export function SwapsClient() {
       }
     }
 
-    loadSwaps()
-  }, [])
+    loadSwaps() } catch (error) {
+  console.error('Could not load local choices:', error)
+}
+  }, []) 
 
   // Keep local storage as a backup of the current selections.
   useEffect(() => {
     localStorage.setItem('cowculator-swaps', JSON.stringify(choices))
   }, [choices])
 
-  useEffect(() => {
-    localStorage.setItem(
-      'cowculator-points-earned',
-      JSON.stringify(pointsEarned)
-    )
-  }, [pointsEarned])
-
   // Save the complete selection object to the logged-in user's Payload record.
   function persistChoices(nextChoices: Record<string, Choice>) {
-    localStorage.setItem(
-      'cowculator-swaps',
-      JSON.stringify(nextChoices)
-    )
-
-    const save = saveQueue.current.then(async () => {
-      const response = await fetch('/api/active-swaps', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          activeSwaps: nextChoices,
-        }),
-      })
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => ({}))
-        throw new Error(
-          result.error || 'Could not save your selections.'
-        )
-      }
-
-      setError('')
-    })
-
-    saveQueue.current = save.catch(error => {
-      console.error('Saving swaps failed:', error)
-      setError(
-        'Your selection could not be saved. Check your connection and try again.'
-      )
-    })
-  }
-
-  const totalPoints = Object.values(pointsEarned).reduce(
-    (sum, points) => sum + points,
-    0
+  localStorage.setItem(
+    'cowculator-swaps',
+    JSON.stringify(nextChoices)
   )
 
-  const groups = useMemo(() => {
-    const foods = new Map<string, Group>()
+  const save = saveQueue.current.then(async () => {
+    const response = await fetch('/api/active-swaps', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        activeSwaps: nextChoices,
+      }),
+    })
 
-    for (const swap of swaps) {
-      for (const food of swap.replaces ?? []) {
-        if (!food || typeof food === 'string') continue
-        if (!isRelevant(food, answers)) continue
-
-        if (!foods.has(food.id)) {
-          foods.set(food.id, {
-            food,
-            alternatives: [],
-          })
-        }
-
-        const group = foods.get(food.id)!
-
-        for (const alternative of swap.alternativeFoods ?? []) {
-          if (
-            !alternative ||
-            typeof alternative === 'string' ||
-            alternative.foodOrigin !== 'plant'
-          ) {
-            continue
-          }
-
-          const alreadyAdded = group.alternatives.some(
-            item => item.food.id === alternative.id
-          )
-
-          if (!alreadyAdded) {
-            group.alternatives.push({
-              food: alternative,
-              swap,
-            })
-          }
-        }
-      }
+    // Guests save locally, not in Payload.
+    if (response.status === 401) {
+      return
     }
 
-    const diverseGroups = new Map<string, Group>()
-
-    for (const group of foods.values()) {
-      if (group.alternatives.length === 0) continue
-
-      const key = getImpactGroup(group.food)
-      const existing = diverseGroups.get(key)
-
-      if (
-        !existing ||
-        (group.food.environmentalScore ?? 0) >
-          (existing.food.environmentalScore ?? 0)
-      ) {
-        diverseGroups.set(key, group)
-      }
-    }
-
-    return Array.from(diverseGroups.values())
-      .sort(
-        (a, b) =>
-          (b.food.environmentalScore ?? 0) -
-          (a.food.environmentalScore ?? 0)
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}))
+      throw new Error(
+        result.error || 'Could not save your selections.'
       )
-      .slice(0, 6)
-  }, [swaps, answers])
+    }
+
+    setError('')
+  })
+
+  saveQueue.current = save.catch(error => {
+    console.error('Saving swaps failed:', error)
+    setError(
+      'Your selection could not be saved. Check your connection and try again.'
+    )
+  })
+}
+
+  const pointsEarned = useMemo(() => {
+  const foodsById = new Map<string, Food>()
+  for (const food of foods) {
+    foodsById.set(String(food.id), food)
+  }
+
+  const earned: Record<string, number> = {}
+
+  for (const [animalId, choice] of Object.entries(choices)) {
+    if (choice.type !== 'alternative') continue
+
+    const animal = foodsById.get(animalId)
+    const alternative = foodsById.get(choice.foodId)
+
+    if (animal?.foodOrigin !== 'animal' || alternative?.foodOrigin !== 'plant') {
+      continue
+    }
+
+    const points = getOptimizationPoints(animal, alternative)
+    if (points > 0) earned[animalId] = points
+  }
+
+  return earned
+}, [foods, choices])
+
+  const totalPoints = Object.values(pointsEarned).reduce(
+  (sum, points) => sum + Math.round(points * 10),
+  0
+)
+
+const groups = useMemo(() => {
+  const alternativesByCategory = new Map<string, Food[]>()
+
+  for (const food of foods) {
+    if (food.isActive === false || food.foodOrigin !== 'plant') continue
+
+    const alternatives = alternativesByCategory.get(food.swapCategory) ?? []
+    alternatives.push(food)
+    alternativesByCategory.set(food.swapCategory, alternatives)
+  }
+
+  return foods
+    .filter(
+      food =>
+        food.isActive !== false &&
+        food.foodOrigin === 'animal' &&
+        isRelevant(food, answers),
+    )
+    .flatMap(food => {
+      const alternatives = alternativesByCategory.get(food.swapCategory) ?? []
+
+      return alternatives.length
+        ? [{
+            food,
+            alternatives: alternatives.map(alternative => ({
+              food: alternative,
+              swapId: `${food.swapCategory}:${food.id}:${alternative.id}`,
+            })),
+          }]
+        : []
+    })
+}, [foods, answers])
 
   // Recalculate masonry row spans whenever cards resize or expand.
   useEffect(() => {
@@ -432,21 +326,19 @@ export function SwapsClient() {
   }
 
   function choose(foodId: string, choice: Choice) {
-    if (
-      choice.type === 'alternative' &&
-      !pointsEarned[foodId]
-    ) {
-      setPointsEarned(previous => ({
-        ...previous,
-        [foodId]: POINTS_PER_SWAP,
-      }))
+    if (choice.type === 'alternative') {
+      const animal = foods.find(food => String(food.id) === foodId)
+      const alternative = foods.find(food => String(food.id) === choice.foodId)
+      const newPoints =
+        animal && alternative ? getOptimizationPoints(animal, alternative) : 0
+      const increase = newPoints - (pointsEarned[foodId] ?? 0)
 
-      setPointsAnimation(POINTS_PER_SWAP)
-
-      window.setTimeout(() => {
-        setPointsAnimation(null)
-      }, 1200)
+      if (increase > 0) {
+        setPointsAnimation(increase)
+        window.setTimeout(() => setPointsAnimation(null), 1200)
+      }
     }
+    
 
     const nextChoices = {
       ...choices,
@@ -582,13 +474,17 @@ export function SwapsClient() {
             }}
           >
             {groups.map(({ food, alternatives }) => {
-              const choice = choices[food.id]
-              const expanded = expandedFoods.includes(food.id)
+              const foodId = String(food.id)
+              const animalCost = food.pricing?.avgCostPer100g
+              const animalImpact = food.environmentalImpact?.impactScorePer100g
+              
+              const choice = choices[foodId]    
+              const expanded = expandedFoods.includes(foodId)
 
               const selectedAlternative =
                 choice?.type === 'alternative'
                   ? alternatives.find(
-                      item => item.food.id === choice.foodId
+                      item => String(item.food.id) === choice.foodId
                     )?.food.name
                   : null
 
@@ -607,8 +503,16 @@ export function SwapsClient() {
                       </span>
 
                       <h2 className="mt-1 truncate text-xl font-black sm:text-2xl">
-                        {food.name}
+                        {food.name}        
                       </h2>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#3F382F]/65">
+                        {animalCost != null && (
+                          <span>Cost: {formatMoney(animalCost)} / 100 g</span>
+                        )}
+                        {animalImpact != null && (
+                          <span>Impact score: {animalImpact}</span>
+                        )}
+                      </div>
 
                       {choice?.type === 'alternative' && (
                         <p className="mt-1 truncate text-xs font-bold text-[#73866B]">
@@ -632,7 +536,7 @@ export function SwapsClient() {
                     <button
                       type="button"
                       className="select-toggle shrink-0"
-                      onClick={() => toggleExpanded(food.id)}
+                      onClick={() => toggleExpanded(foodId)}
                       aria-expanded={expanded}
                       aria-label={
                         expanded
@@ -651,24 +555,25 @@ export function SwapsClient() {
                       </h3>
 
                       <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
-                        {alternatives.map(({ food: alternative, swap }) => {
+                        {alternatives.map(({ food: alternative, swapId }) => {
+                          const alternativeId = String(alternative.id)
                           const isSelected =
                             choice?.type === 'alternative' &&
-                            choice.foodId === alternative.id
+                            choice.foodId === alternativeId
 
                           const protein = getProtein(alternative)
                           const cost =
-                            alternative.costPerServing ?? alternative.cost
+                            alternative.pricing?.avgCostPer100g
 
                           return (
                             <button
-                              key={`${swap.id}-${alternative.id}`}
+                              key={`${swapId}-${alternative.id}`}
                               type="button"
                               onClick={() =>
-                                choose(food.id, {
+                                choose(foodId, {
                                   type: 'alternative',
-                                  foodId: alternative.id,
-                                  swapId: swap.id,
+                                  foodId: alternativeId,
+                                  swapId: swapId,
                                 })
                               }
                               className={`w-full rounded-xl border p-3 text-left transition-colors ${
@@ -688,24 +593,24 @@ export function SwapsClient() {
                               </div>
 
                               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#3F382F]/65">
-                                {cost !== undefined && (
+                                {cost != null && (
                                   <span>
-                                    Cost: {formatMoney(cost)}
-                                    {alternative.costPerServing !== undefined
-                                      ? ' / serving'
-                                      : ''}
+                                  
+                                    {cost != null && (
+                                      <span>Cost: {formatMoney(cost)} / 100 g</span>
+                                    )}
                                   </span>
                                 )}
 
-                                {protein !== undefined && (
+                                {protein != null && (
                                   <span>
                                     Protein: {protein}g
                                   </span>
                                 )}
 
-                                {alternative.environmentalScore !== undefined && (
+                                {alternative.environmentalImpact?.impactScorePer100g != null && (
                                   <span>
-                                    Impact score: {alternative.environmentalScore}
+                                    Impact score: {alternative.environmentalImpact?.impactScorePer100g}
                                   </span>
                                 )}
                               </div>
@@ -718,7 +623,7 @@ export function SwapsClient() {
                         <button
                           type="button"
                           onClick={() =>
-                            choose(food.id, { type: 'give-up' })
+                            choose(foodId, { type: 'give-up' })
                           }
                           className="text-xs font-bold underline underline-offset-2"
                         >
@@ -733,11 +638,11 @@ export function SwapsClient() {
 
                         <div className="mt-3 space-y-2">
                           <input
-                            value={customText[food.id] ?? ''}
+                            value={customText[foodId] ?? ''}
                             onChange={event =>
                               setCustomText(previous => ({
                                 ...previous,
-                                [food.id]: event.target.value,
+                                [foodId]: event.target.value,
                               }))
                             }
                             placeholder="Alternative food"
@@ -746,11 +651,11 @@ export function SwapsClient() {
                           />
 
                           <textarea
-                            value={customNotes[food.id] ?? ''}
+                            value={customNotes[foodId] ?? ''}
                             onChange={event =>
                               setCustomNotes(previous => ({
                                 ...previous,
-                                [food.id]: event.target.value,
+                                [foodId]: event.target.value,
                               }))
                             }
                             placeholder="Optional notes"
@@ -762,13 +667,13 @@ export function SwapsClient() {
                           <button
                             type="button"
                             disabled={
-                              !customText[food.id]?.trim() ||
-                              submittingFood === food.id
+                              !customText[foodId]?.trim() ||
+                              submittingFood === foodId
                             }
-                            onClick={() => submitCustom(food.id)}
+                            onClick={() => submitCustom(foodId)}
                             className="pixel-button text-sm disabled:opacity-50"
                           >
-                            {submittingFood === food.id
+                            {submittingFood === foodId
                               ? 'Submitting...'
                               : 'Submit idea'}
                           </button>

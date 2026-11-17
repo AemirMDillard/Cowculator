@@ -151,10 +151,7 @@ export interface Config {
     folders: Folder;
     tags: Tag;
     foods: Food;
-    swaps: Swap;
-    'swap-suggestions': SwapSuggestion;
     sources: Source;
-    'impact-factors': ImpactFactor;
     leaderboard: Leaderboard;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -170,10 +167,7 @@ export interface Config {
     folders: FoldersSelect<false> | FoldersSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     foods: FoodsSelect<false> | FoodsSelect<true>;
-    swaps: SwapsSelect<false> | SwapsSelect<true>;
-    'swap-suggestions': SwapSuggestionsSelect<false> | SwapSuggestionsSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
-    'impact-factors': ImpactFactorsSelect<false> | ImpactFactorsSelect<true>;
     leaderboard: LeaderboardSelect<false> | LeaderboardSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -491,56 +485,108 @@ export interface Food {
   description?: string | null;
   image?: (number | null) | Media;
   foodOrigin: 'animal' | 'plant' | 'fungi' | 'algae';
-  foodCategory:
-    | 'meat'
-    | 'poultry'
-    | 'fish'
-    | 'seafood'
-    | 'dairy'
-    | 'eggs'
-    | 'legumes'
-    | 'soy'
-    | 'grains'
-    | 'nuts_seeds'
-    | 'fruits'
-    | 'vegetables'
-    | 'fungi'
-    | 'algae'
-    | 'other';
+  verificationStatus: 'verified' | 'suggestion';
+  swapCategory: 'beef' | 'poultry' | 'fish' | 'pork' | 'seafood' | 'dairy' | 'eggs' | 'other';
+  foodCategory?:
+    | (
+        | 'meat'
+        | 'poultry'
+        | 'fish'
+        | 'seafood'
+        | 'dairy'
+        | 'eggs'
+        | 'legumes'
+        | 'soy'
+        | 'grains'
+        | 'nuts_seeds'
+        | 'fruits'
+        | 'vegetables'
+        | 'fungi'
+        | 'algae'
+        | 'other'
+      )
+    | null;
   animalProductCategory?: ('beef' | 'pork' | 'poultry' | 'fish' | 'seafood' | 'dairy' | 'eggs' | 'other') | null;
+  textureTags?:
+    | (
+        | 'smooth'
+        | 'creamy'
+        | 'soft'
+        | 'firm'
+        | 'chewy'
+        | 'crunchy'
+        | 'crispy'
+        | 'fibrous'
+        | 'grainy'
+        | 'liquid'
+        | 'tender'
+        | 'flaky'
+        | 'springy'
+        | 'custardy'
+        | 'crumbly'
+        | 'moist'
+        | 'dense'
+        | 'meaty'
+        | 'juicy'
+        | 'crisp'
+        | 'silky'
+        | 'thick'
+        | 'spreadable'
+        | 'powdery'
+        | 'gel-like'
+        | 'foamy'
+        | 'oily'
+      )[]
+    | null;
+  tasteProfiles?:
+    | (
+        | 'sweet'
+        | 'savory'
+        | 'bitter'
+        | 'sour'
+        | 'umami'
+        | 'neutral'
+        | 'mild'
+        | 'earthy'
+        | 'smoky'
+        | 'briny'
+        | 'tangy'
+        | 'nutty'
+        | 'rich'
+        | 'creamy'
+        | 'herbal'
+        | 'salty'
+        | 'bean-like'
+        | 'cheesy'
+        | 'buttery'
+        | 'coconut'
+      )[]
+    | null;
   servingSize?: number | null;
   servingUnit?: ('g' | 'ml' | 'pieces' | 'tbsp' | 'cups') | null;
-  nutritionPer100g?: {
+  nutrition?: {
+    calories?: number | null;
     proteinG?: number | null;
-    vitaminB12Mcg?: number | null;
+    fiberG?: number | null;
     ironMg?: number | null;
     calciumMg?: number | null;
+    vitaminB12Mcg?: number | null;
     omega3G?: number | null;
     zincMg?: number | null;
     iodineMcg?: number | null;
-    fiberG?: number | null;
   };
-  textures?:
-    ('smooth' | 'creamy' | 'soft' | 'firm' | 'chewy' | 'crunchy' | 'crispy' | 'fibrous' | 'grainy' | 'liquid')[] | null;
-  textureConsistency?: ('consistent' | 'mixed' | 'variable') | null;
-  tasteProfiles?: ('sweet' | 'savory' | 'bitter' | 'sour' | 'umami' | 'neutral')[] | null;
-  smellIntensity?: ('mild' | 'moderate' | 'strong') | null;
-  appearanceCharacteristics?: ('uniform' | 'mixed' | 'chunky' | 'textured')[] | null;
-  temperatureOptions?: ('hot' | 'cold' | 'room_temperature')[] | null;
-  sensoryConsiderations?: string | null;
-  impactGroup?:
-    | ('red_meat' | 'poultry' | 'fish' | 'shellfish' | 'milk' | 'cheese' | 'butter_cream' | 'yogurt' | 'eggs' | 'other')
-    | null;
-  allergens?:
-    ('soy' | 'wheat_gluten' | 'peanuts' | 'tree_nuts' | 'sesame' | 'milk' | 'eggs' | 'fish' | 'shellfish')[] | null;
-  digestiveConsiderations?: ('high_fiber' | 'lactose' | 'fodmaps' | 'potential_discomfort')[] | null;
-  nutritionalCautions?: string | null;
-  preparationComplexity?: ('minimal' | 'moderate' | 'involved') | null;
-  availability?: ('common' | 'specialty' | 'difficult') | null;
-  estimatedCostPerServing?: number | null;
-  currency?: 'USD' | null;
-  costRegion?: string | null;
-  costLastUpdated?: string | null;
+  environmentalImpact?: {
+    co2eKg?: number | null;
+    waterLiters?: number | null;
+    landM2?: number | null;
+    animalsPer100g?: number | null;
+    impactScorePer100g?: number | null;
+  };
+  pricing?: {
+    avgCostPer100g?: number | null;
+    costPer20gProtein?: number | null;
+    priceTier?: ('low' | 'mid' | 'high') | null;
+  };
   sources?: (number | Source)[] | null;
   isActive?: boolean | null;
   createdBy?:
@@ -580,122 +626,6 @@ export interface Source {
   evidenceLevel?: ('systematic_review' | 'peer_reviewed' | 'institutional' | 'other') | null;
   publicationDate?: string | null;
   accessedAt?: string | null;
-  notes?: string | null;
-  isActive?: boolean | null;
-  createdBy?:
-    | ({
-        relationTo: 'admins';
-        value: number | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'admins';
-        value: number | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "swaps".
- */
-export interface Swap {
-  id: number;
-  name: string;
-  description?: string | null;
-  replaces: (number | Food)[];
-  alternativeFoods: (number | Food)[];
-  swapCategory: 'protein' | 'dairy' | 'eggs' | 'seafood' | 'other';
-  nutrientBenefits?: ('protein' | 'b12' | 'iron' | 'calcium' | 'omega3' | 'zinc' | 'iodine' | 'fiber')[] | null;
-  nutritionalNotes?: string | null;
-  sensoryMatchNotes?: string | null;
-  recommendationNotes?: string | null;
-  sources?: (number | Source)[] | null;
-  sortOrder?: number | null;
-  isActive?: boolean | null;
-  createdBy?:
-    | ({
-        relationTo: 'admins';
-        value: number | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'admins';
-        value: number | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "swap-suggestions".
- */
-export interface SwapSuggestion {
-  id: number;
-  foodBeingReplaced: number | Food;
-  suggestedAlternative: string;
-  notes?: string | null;
-  status?: ('pending' | 'approved' | 'rejected') | null;
-  createdBy?:
-    | ({
-        relationTo: 'admins';
-        value: number | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'admins';
-        value: number | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "impact-factors".
- */
-export interface ImpactFactor {
-  id: number;
-  name: string;
-  food: number | Food;
-  basisAmount: number;
-  basisUnit: 'kg' | 'g' | 'liters';
-  environmentalImpact?: {
-    co2eKg?: number | null;
-    waterLiters?: number | null;
-    landM2?: number | null;
-  };
-  animalImpact?: {
-    estimatedAnimalsPerUnit?: number | null;
-    methodology?: string | null;
-  };
-  sources: (number | Source)[];
-  calculationVersion: string;
-  effectiveFrom?: string | null;
-  effectiveUntil?: string | null;
   notes?: string | null;
   isActive?: boolean | null;
   createdBy?:
@@ -804,20 +734,8 @@ export interface PayloadLockedDocument {
         value: number | Food;
       } | null)
     | ({
-        relationTo: 'swaps';
-        value: number | Swap;
-      } | null)
-    | ({
-        relationTo: 'swap-suggestions';
-        value: number | SwapSuggestion;
-      } | null)
-    | ({
         relationTo: 'sources';
         value: number | Source;
-      } | null)
-    | ({
-        relationTo: 'impact-factors';
-        value: number | ImpactFactor;
       } | null)
     | ({
         relationTo: 'leaderboard';
@@ -1061,77 +979,45 @@ export interface FoodsSelect<T extends boolean = true> {
   description?: T;
   image?: T;
   foodOrigin?: T;
+  verificationStatus?: T;
+  swapCategory?: T;
   foodCategory?: T;
   animalProductCategory?: T;
+  textureTags?: T;
+  tasteProfiles?: T;
   servingSize?: T;
   servingUnit?: T;
-  nutritionPer100g?:
+  nutrition?:
     | T
     | {
+        calories?: T;
         proteinG?: T;
-        vitaminB12Mcg?: T;
+        fiberG?: T;
         ironMg?: T;
         calciumMg?: T;
+        vitaminB12Mcg?: T;
         omega3G?: T;
         zincMg?: T;
         iodineMcg?: T;
-        fiberG?: T;
       };
-  textures?: T;
-  textureConsistency?: T;
-  tasteProfiles?: T;
-  smellIntensity?: T;
-  appearanceCharacteristics?: T;
-  temperatureOptions?: T;
-  sensoryConsiderations?: T;
-  impactGroup?: T;
-  allergens?: T;
-  digestiveConsiderations?: T;
-  nutritionalCautions?: T;
-  preparationComplexity?: T;
-  availability?: T;
-  estimatedCostPerServing?: T;
-  currency?: T;
-  costRegion?: T;
-  costLastUpdated?: T;
+  environmentalImpact?:
+    | T
+    | {
+        co2eKg?: T;
+        waterLiters?: T;
+        landM2?: T;
+        animalsPer100g?: T;
+        impactScorePer100g?: T;
+      };
+  pricing?:
+    | T
+    | {
+        avgCostPer100g?: T;
+        costPer20gProtein?: T;
+        priceTier?: T;
+      };
   sources?: T;
   isActive?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "swaps_select".
- */
-export interface SwapsSelect<T extends boolean = true> {
-  name?: T;
-  description?: T;
-  replaces?: T;
-  alternativeFoods?: T;
-  swapCategory?: T;
-  nutrientBenefits?: T;
-  nutritionalNotes?: T;
-  sensoryMatchNotes?: T;
-  recommendationNotes?: T;
-  sources?: T;
-  sortOrder?: T;
-  isActive?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "swap-suggestions_select".
- */
-export interface SwapSuggestionsSelect<T extends boolean = true> {
-  foodBeingReplaced?: T;
-  suggestedAlternative?: T;
-  notes?: T;
-  status?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1152,39 +1038,6 @@ export interface SourcesSelect<T extends boolean = true> {
   evidenceLevel?: T;
   publicationDate?: T;
   accessedAt?: T;
-  notes?: T;
-  isActive?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "impact-factors_select".
- */
-export interface ImpactFactorsSelect<T extends boolean = true> {
-  name?: T;
-  food?: T;
-  basisAmount?: T;
-  basisUnit?: T;
-  environmentalImpact?:
-    | T
-    | {
-        co2eKg?: T;
-        waterLiters?: T;
-        landM2?: T;
-      };
-  animalImpact?:
-    | T
-    | {
-        estimatedAnimalsPerUnit?: T;
-        methodology?: T;
-      };
-  sources?: T;
-  calculationVersion?: T;
-  effectiveFrom?: T;
-  effectiveUntil?: T;
   notes?: T;
   isActive?: T;
   createdBy?: T;
@@ -1294,18 +1147,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection:
-      | 'admins'
-      | 'users'
-      | 'media'
-      | 'folders'
-      | 'tags'
-      | 'foods'
-      | 'swaps'
-      | 'swap-suggestions'
-      | 'sources'
-      | 'impact-factors'
-      | 'leaderboard';
+    relatedCollection: 'admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard';
     where?:
       | {
           [k: string]: unknown;
@@ -1328,20 +1170,7 @@ export interface CollectionQueryWidget {
 export interface ActivityWidget {
   data?: {
     excludedCollections?:
-      | (
-          | 'admins'
-          | 'users'
-          | 'media'
-          | 'folders'
-          | 'tags'
-          | 'foods'
-          | 'swaps'
-          | 'swap-suggestions'
-          | 'sources'
-          | 'impact-factors'
-          | 'leaderboard'
-        )[]
-      | null;
+      ('admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

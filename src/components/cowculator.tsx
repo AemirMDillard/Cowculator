@@ -746,6 +746,7 @@ type ImpactValues = {
 }
 
 type ImpactResponse = {
+  estimateBasis?: 'annual' | 'per-100g'
   projectedImpact: ImpactValues
   cumulativeImpact: ImpactValues & {
     plantBasedDays: number
@@ -791,6 +792,136 @@ const emptyImpact: ImpactResponse = {
   selectedSwapCount: 0,
   points: null,
   displayName: 'Planet Pal',
+}
+
+type GuestFood = {
+  id: number | string
+  foodOrigin: string
+  environmentalImpact?: {
+    co2eKg?: number | null
+    waterLiters?: number | null
+    landM2?: number | null
+    animalsPer100g?: number | null
+    impactScorePer100g?: number | null
+  } | null
+}
+
+type GuestChoice = {
+  type?: string
+  foodId?: string
+}
+
+function positiveDifference(
+  animalValue: number | null | undefined,
+  plantValue: number | null | undefined,
+) {
+  if (
+    animalValue == null ||
+    plantValue == null ||
+    !Number.isFinite(animalValue) ||
+    !Number.isFinite(plantValue)
+  ) {
+    return 0
+  }
+
+  return Math.max(0, animalValue - plantValue)
+}
+
+function calculateGuestImpact(
+  foods: GuestFood[],
+  choices: Record<string, GuestChoice>,
+): ImpactResponse {
+  const foodsById = new Map(
+    foods.map((food) => [String(food.id), food]),
+  )
+
+  const projectedImpact: ImpactValues = {
+    co2eSaved: 0,
+    waterSaved: 0,
+    landSaved: 0,
+    animalsSpared: 0,
+  }
+
+  let selectedSwapCount = 0
+  let points = 0
+
+  for (const [animalId, choice] of Object.entries(choices)) {
+    if (!choice || typeof choice !== 'object') continue
+
+    if (choice.type === 'custom') {
+      selectedSwapCount += 1
+      continue
+    }
+
+    if (choice.type !== 'alternative') continue
+
+    selectedSwapCount += 1
+
+    if (typeof choice.foodId !== 'string') continue
+
+    const animal = foodsById.get(animalId)
+    const plant = foodsById.get(choice.foodId)
+
+    if (
+      animal?.foodOrigin !== 'animal' ||
+      plant?.foodOrigin !== 'plant'
+    ) {
+      continue
+    }
+
+    const animalImpact = animal.environmentalImpact
+    const plantImpact = plant.environmentalImpact
+
+    projectedImpact.co2eSaved += positiveDifference(
+      animalImpact?.co2eKg,
+      plantImpact?.co2eKg,
+    )
+    projectedImpact.waterSaved += positiveDifference(
+      animalImpact?.waterLiters,
+      plantImpact?.waterLiters,
+    )
+    projectedImpact.landSaved += positiveDifference(
+      animalImpact?.landM2,
+      plantImpact?.landM2,
+    )
+    projectedImpact.animalsSpared += positiveDifference(
+      animalImpact?.animalsPer100g,
+      plantImpact?.animalsPer100g,
+    )
+
+    if (
+      animalImpact?.impactScorePer100g != null &&
+      plantImpact?.impactScorePer100g != null
+    ) {
+      const scoreDifference = Math.max(
+        0,
+        Number(
+          (
+            animalImpact.impactScorePer100g -
+            plantImpact.impactScorePer100g
+          ).toFixed(2),
+        ),
+      )
+
+      points += Math.round(scoreDifference * 10)
+    }
+  }
+
+  return {
+    projectedImpact,
+    cumulativeImpact: {
+      co2eSaved: 0,
+      waterSaved: 0,
+      landSaved: 0,
+      animalsSpared: 0,
+      plantBasedDays: 0,
+    },
+    currentStreak: 0,
+    selectedSwapCount,
+    points,
+    displayName: 'Planet Pal',
+    estimateBasis: 'per-100g',
+  }
 }
 
 function formatNumber(value: number, decimals = 0) {
@@ -877,23 +1008,56 @@ function useImpactData() {
           cache: 'no-store',
         })
 
+        if (response.status === 401) {
+          const foodsResponse = await fetch('/api/foods', {
+            signal: controller.signal,
+            cache: 'no-store',
+          })
+
+          if (!foodsResponse.ok) {
+            throw new Error('Unable to load foods for your guest results.')
+          }
+
+          const foodsResult = (await foodsResponse.json()) as {
+            docs?: GuestFood[]
+          }
+
+          if (!Array.isArray(foodsResult.docs)) {
+            throw new Error('The foods response was invalid.')
+          }
+
+          const savedChoicesText = localStorage.getItem('cowculator-swaps')
+          let savedChoices: Record<string, GuestChoice> = {}
+
+          if (savedChoicesText) {
+            const parsed: unknown = JSON.parse(savedChoicesText)
+
+            if (
+              !parsed ||
+              typeof parsed !== 'object' ||
+              Array.isArray(parsed)
+            ) {
+              throw new Error('Your saved guest swaps are invalid.')
+            }
+
+            savedChoices = parsed as Record<string, GuestChoice>
+          }
+
+          setData(calculateGuestImpact(foodsResult.docs, savedChoices))
+          return
+        }
+
         if (!response.ok) {
-          throw new Error(
-            response.status === 401
-              ? 'Please log in to view your impact.'
-              : 'Unable to load your impact data.'
-          )
+          throw new Error('Unable to load your impact data.')
         }
 
         const result: ImpactResponse = await response.json()
-        setData(result)
+        setData({ ...result, estimateBasis: 'annual' })
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return
 
         setError(
-          err instanceof Error
-            ? err.message
-            : 'Something went wrong.'
+          err instanceof Error ? err.message : 'Something went wrong.',
         )
       } finally {
         if (!controller.signal.aborted) {
@@ -913,7 +1077,7 @@ function useImpactData() {
 function LoadingMessage() {
   return (
     <div className="py-16 text-center">
-      <Icon name="loader" size={28} />
+      <Icon name="spark" size={28} />
       <p className="mt-3">Loading your impact...</p>
     </div>
   )
@@ -1057,9 +1221,12 @@ export function ResultsPage() {
               Select eligible swaps with researched impact data to see
               your projected annual impact here.
             </p>
-            <Link className="pixel-button mt-5 inline-flex" href="/swaps">
-              Explore swaps
+            <div className="mt-7 flex justify-center">
+            <Link href="/swaps" className="pixel-button">
+              Explore more swaps
+              <Icon name="arrow" />
             </Link>
+          </div>
           </div>
         )}
 
@@ -1288,9 +1455,7 @@ export function LeaderboardPage() {
 
         {tab === 'Friends' && (
           <p className="mt-4 text-center text-sm text-[#3F382F]/60">
-            Friend-specific rankings require a friends or connections
-            relationship in your user data. Your current Leaderboard
-            collection does not contain that relationship yet.
+            We're working on friend connections. Check back soon!
           </p>
         )}
       </div>
@@ -1488,13 +1653,12 @@ export function DashboardPage() {
               </p>
             </div>
 
-            <Link
-              href="/swaps"
-              className="pixel-button mt-7 flex justify-center"
-            >
+            <div className="mt-7 flex justify-center">
+            <Link href="/swaps" className="pixel-button">
               Explore more swaps
               <Icon name="arrow" />
             </Link>
+          </div>
           </article>
         </div>
 
