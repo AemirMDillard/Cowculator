@@ -1,4 +1,7 @@
 import type { Access, CollectionConfig, FieldAccess } from 'payload'
+import { randomBytes } from 'node:crypto'
+import { isRecord } from '@/lib/guards'
+import { isUsernameTaken } from '@/lib/usernames'
 
 const isSelf: Access = ({ req }) => {
   const user = req.user
@@ -35,12 +38,88 @@ const canReadUsers: Access = ({ req }) => {
 // Impact totals should only be changed by trusted server-side
 // calculations or administrators, not directly by user requests.
 
-const isAdmin: FieldAccess = ({ req }) =>
-  req.user?.collection === 'admins'
+const isAdmin: FieldAccess = ({ req }) => req.user?.collection === 'admins'
 
 export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
+
+  hooks: {
+    beforeChange: [
+      async ({ data, operation, originalDoc, req }) => {
+        if (typeof data.name === 'string') {
+          data.name = data.name.trim()
+        }
+
+        const name = typeof data.name === 'string' ? data.name : originalDoc?.name
+        const nameChanged = operation === 'create' || data.name !== undefined
+
+        if (nameChanged && typeof name === 'string') {
+          if (name.length < 2 || name.length > 32) {
+            throw new Error('Username must be between 2 and 32 characters.')
+          }
+
+          if (await isUsernameTaken(req.payload, name, originalDoc?.id)) {
+            throw new Error('That username is already taken.')
+          }
+        }
+
+        if (operation !== 'create') return data
+
+        data.referralCode = randomBytes(12).toString('hex')
+        let answers = isRecord(data.quizResponses) ? data.quizResponses : {}
+        const isVeganAtSignup =
+          data.dietType === 'vegan' || answers.dietPattern === 'Fully plant-based (vegan)'
+
+        if (isVeganAtSignup) {
+          data.dietType = 'vegan'
+          answers = { ...answers, dietPattern: 'Fully plant-based (vegan)' }
+          data.quizResponses = answers
+        }
+
+        const referralCodeUsed =
+          typeof data.referralCodeUsed === 'string'
+            ? data.referralCodeUsed.trim().toLowerCase()
+            : ''
+
+        if (!referralCodeUsed) {
+          data.referralCodeUsed = null
+          return data
+        }
+
+        const referrals = await req.payload.find({
+          collection: 'users',
+          where: { referralCode: { equals: referralCodeUsed } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const referrer = referrals.docs[0]
+
+        if (!referrer) {
+          throw new Error('That friend invite link is invalid or expired.')
+        }
+
+        const email = typeof data.email === 'string' ? data.email.trim().toLowerCase() : ''
+
+        if (referrer.email.trim().toLowerCase() === email) {
+          throw new Error('You cannot use your own friend invite link.')
+        }
+
+        data.referralCodeUsed = referralCodeUsed
+        // Snapshot signup status so later quiz changes don't rewrite referral credit.
+        const metadata = isRecord(answers.__cowculator) ? answers.__cowculator : {}
+        data.quizResponses = {
+          ...answers,
+          __cowculator: {
+            ...metadata,
+            veganReferralAtSignup: isVeganAtSignup,
+          },
+        }
+        return data
+      },
+    ],
+  },
 
   access: {
     create: () => true,
@@ -51,12 +130,7 @@ export const Users: CollectionConfig = {
 
   admin: {
     useAsTitle: 'email',
-    defaultColumns: [
-      'name',
-      'email',
-      'dietType',
-      'createdAt',
-    ],
+    defaultColumns: ['name', 'email', 'dietType', 'createdAt'],
   },
 
   fields: [
@@ -71,6 +145,31 @@ export const Users: CollectionConfig = {
       type: 'checkbox',
       label: 'Wants the seven-day meal plan',
       defaultValue: false,
+    },
+    {
+      name: 'referralCode',
+      type: 'text',
+      unique: true,
+      index: true,
+      access: {
+        update: () => false,
+      },
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'referralCodeUsed',
+      type: 'text',
+      index: true,
+      access: {
+        read: ({ req }) => req.user?.collection === 'admins',
+        update: () => false,
+      },
+      admin: {
+        hidden: true,
+      },
     },
 
     // CURRENT HABITS

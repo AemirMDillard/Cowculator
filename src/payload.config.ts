@@ -1,4 +1,3 @@
-
 import path from 'path'
 import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -13,6 +12,7 @@ import { Users } from './collections/Users'
 import { Foods } from './collections/Foods'
 import { Sources } from './collections/Sources'
 import { Leaderboard } from './collections/Leaderboard'
+import { Friendships } from './collections/Friendships'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -42,7 +42,7 @@ export default buildConfig({
     fallbackLanguage: 'en',
     supportedLanguages: { en: adminLanguage },
   },
-  collections: [Admins, Users, Media, Folders, Tags, Foods, Sources, Leaderboard],
+  collections: [Admins, Users, Media, Folders, Tags, Foods, Sources, Leaderboard, Friendships],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

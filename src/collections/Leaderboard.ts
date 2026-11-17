@@ -64,6 +64,16 @@ export const Leaderboard: CollectionConfig = {
       defaultValue: 0,
     },
     {
+      name: 'optimizationPoints',
+      type: 'number',
+      defaultValue: 0,
+    },
+    {
+      name: 'referralPoints',
+      type: 'number',
+      defaultValue: 0,
+    },
+    {
       name: 'combinedScore',
       type: 'number',
       defaultValue: 0,

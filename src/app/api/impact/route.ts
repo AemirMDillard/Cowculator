@@ -1,72 +1,54 @@
-
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getUserSession } from '@/lib/api-session'
+import { isRecord } from '@/lib/guards'
+import { numberOrZero } from '@/lib/numbers'
+import {
+  calculatePer100gImpact,
+  calculateProjectedImpact,
+  hasAnimalFrequencyAnswers,
+  isImpactChoiceMap,
+  isFullyPlantBased,
+} from '@/lib/impact-calculations'
 
 export const dynamic = 'force-dynamic'
 
-function getNumber(value: unknown): number {
-  const number = Number(value)
-  return Number.isFinite(number) ? number : 0
-}
-
 function getImpactValues(value: unknown) {
-  const impact =
-    value && typeof value === 'object'
-      ? (value as Record<string, unknown>)
-      : {}
+  const impact = isRecord(value) ? value : {}
 
   return {
-    co2eSaved: getNumber(impact.co2eSaved),
-    waterSaved: getNumber(impact.waterSaved),
-    landSaved: getNumber(impact.landSaved),
-    animalsSpared: getNumber(impact.animalsSpared),
+    co2eSaved: numberOrZero(impact.co2eSaved),
+    waterSaved: numberOrZero(impact.waterSaved),
+    landSaved: numberOrZero(impact.landSaved),
+    animalsSpared: 0,
   }
 }
 
 function countSelectedSwaps(value: unknown): number {
   if (Array.isArray(value)) {
-    return value.filter(
-      (choice) =>
-        choice &&
-        typeof choice === 'object' &&
-        ['alternative', 'custom'].includes(
-          (choice as Record<string, unknown>).type as string
-        )
-    ).length
+    return value.filter(isSelectedChoice).length
   }
 
-  if (!value || typeof value !== 'object') {
-    return 0
-  }
+  if (!isRecord(value)) return 0
+  return Object.values(value).filter(isSelectedChoice).length
+}
 
-  return Object.values(value as Record<string, unknown>).filter(
-    (choice) =>
-      choice &&
-      typeof choice === 'object' &&
-      ['alternative', 'custom'].includes(
-        (choice as Record<string, unknown>).type as string
-      )
-  ).length
+function isSelectedChoice(value: unknown): boolean {
+  return (
+    isRecord(value) && ['alternative', 'plant-alternative', 'custom'].includes(String(value.type))
+  )
 }
 
 export async function GET(request: Request) {
   try {
-    const payload = await getPayload({ config })
-
-    // Authenticate the request using the user's session cookie.
-    const { user } = await payload.auth({
-      headers: request.headers,
-    })
-
-    if (!user || user.collection !== 'users') {
+    const session = await getUserSession(request)
+    if (!session) {
       return NextResponse.json(
         { error: 'You must be logged in to view your impact.' },
-        { status: 401 }
+        { status: 401 },
       )
     }
+    const { payload, user } = session
 
-    // Retrieve the authenticated user's own record.
     const userRecord = await payload.findByID({
       collection: 'users',
       id: user.id,
@@ -74,15 +56,40 @@ export async function GET(request: Request) {
       overrideAccess: true,
     })
 
-    const projectedImpact = getImpactValues(
-      userRecord.projectedImpact
-    )
+    const choices = isImpactChoiceMap(userRecord.activeSwaps) ? userRecord.activeSwaps : {}
+    const foodIds = Object.entries(choices)
+      .filter(([, choice]) => choice.type === 'alternative')
+      .flatMap(([animalId, choice]) =>
+        choice.type === 'alternative' ? [animalId, choice.foodId] : [],
+      )
+    const foods = foodIds.length
+      ? await payload.find({
+          collection: 'foods',
+          where: {
+            id: { in: foodIds },
+            isActive: { equals: true },
+          },
+          limit: 1000,
+          depth: 0,
+          overrideAccess: true,
+        })
+      : { docs: [] }
+    const quizResponses = userRecord.quizResponses
+    const isVegan = isFullyPlantBased(quizResponses)
+    const hasFrequencies = hasAnimalFrequencyAnswers(quizResponses)
+    const impactResult = isVegan
+      ? {
+          projectedImpact: { co2eSaved: 0, waterSaved: 0, landSaved: 0, animalsSpared: 0 },
+          qualifyingSwaps: 0,
+        }
+      : hasFrequencies
+        ? calculateProjectedImpact(choices, foods.docs, quizResponses)
+        : calculatePer100gImpact(choices, foods.docs)
+    const projectedImpact = impactResult.projectedImpact
 
     const cumulativeImpact = {
       ...getImpactValues(userRecord.cumulativeImpact),
-      plantBasedDays: getNumber(
-        userRecord.cumulativeImpact?.plantBasedDays
-      ),
+      plantBasedDays: numberOrZero(userRecord.cumulativeImpact?.plantBasedDays),
     }
 
     // Use the latest monthly leaderboard score if one exists.
@@ -100,34 +107,50 @@ export async function GET(request: Request) {
       overrideAccess: true,
     })
 
-    const latestScore = leaderboard.docs[0]?.combinedScore
-
+    const latestEntry = leaderboard.docs[0]
+    const legacyPersonalPoints =
+      latestEntry?.combinedScore == null
+        ? null
+        : Math.max(
+            0,
+            numberOrZero(latestEntry.combinedScore) -
+              numberOrZero(latestEntry.environmentalScore) -
+              numberOrZero(latestEntry.animalImpactScore) -
+              numberOrZero(latestEntry.plantBasedScore) -
+              numberOrZero(latestEntry.referralPoints),
+          )
+    const personalPoints = latestEntry?.optimizationPoints ?? legacyPersonalPoints
+    const referralPoints = numberOrZero(latestEntry?.referralPoints)
     return NextResponse.json(
       {
         projectedImpact,
         cumulativeImpact,
-        currentStreak: getNumber(userRecord.currentStreak),
-        selectedSwapCount: countSelectedSwaps(
-          userRecord.activeSwaps
-        ),
+        estimateBasis: isVegan ? 'not-applicable' : hasFrequencies ? 'annual' : 'per-100g',
+        currentStreak: numberOrZero(userRecord.currentStreak),
+        selectedSwapCount: countSelectedSwaps(userRecord.activeSwaps),
+        quantifiedSwapCount: impactResult.qualifyingSwaps,
+        activeSwaps: choices,
+        quizResponses,
         points:
-          latestScore === null || latestScore === undefined
+          personalPoints === null || personalPoints === undefined
             ? null
-            : getNumber(latestScore),
+            : numberOrZero(personalPoints) + referralPoints,
+        personalPoints:
+          personalPoints === null || personalPoints === undefined
+            ? null
+            : numberOrZero(personalPoints),
+        referralPoints,
         displayName: userRecord.name || 'Planet Pal',
       },
       {
         headers: {
           'Cache-Control': 'no-store',
         },
-      }
+      },
     )
   } catch (error) {
     console.error('GET /api/impact error:', error)
 
-    return NextResponse.json(
-      { error: 'Unable to load your impact data.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Unable to load your impact data.' }, { status: 500 })
   }
 }

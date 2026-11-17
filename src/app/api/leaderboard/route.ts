@@ -1,109 +1,134 @@
 import { NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPayloadSession } from '@/lib/api-session'
+import { numberOrZero } from '@/lib/numbers'
+import { getRelationId } from '@/lib/payload-relations'
 
 export const dynamic = 'force-dynamic'
-
-function getNumber(value: unknown): number {
-  const number = Number(value)
-  return Number.isFinite(number) ? number : 0
-}
-
-function getRelatedUserId(value: unknown): string | null {
-  if (typeof value === 'string' || typeof value === 'number') {
-    return String(value)
-  }
-
-  if (value && typeof value === 'object' && 'id' in value) {
-    const id = value.id
-
-    if (typeof id === 'string' || typeof id === 'number') {
-      return String(id)
-    }
-  }
-
-  return null
-}
 
 export async function GET(request: Request) {
   try {
     const period = new URL(request.url).searchParams.get('period') ?? 'Global'
 
     if (!['Global', 'Friends', 'This month'].includes(period)) {
-      return NextResponse.json(
-        { error: 'Invalid leaderboard period.' },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: 'Invalid leaderboard period.' }, { status: 400 })
     }
 
-    const payload = await getPayload({ config })
-    const { user } = await payload.auth({ headers: request.headers })
-    const loggedInUserId =
-      user?.collection === 'users' ? String(user.id) : undefined
-
-    // Friend relationships are not implemented yet.
-    if (period === 'Friends') {
-      return NextResponse.json(
-        { entries: [] },
-        { headers: { 'Cache-Control': 'no-store' } },
-      )
-    }
+    const { payload, user } = await getPayloadSession(request)
+    const loggedInUserId = user ? String(user.id) : undefined
 
     const now = new Date()
-    const result = await payload.find({
-      collection: 'leaderboard',
-      ...(period === 'This month'
-        ? {
-            where: {
-              year: { equals: now.getFullYear() },
-              month: { equals: now.getMonth() + 1 },
-            },
-          }
-        : {}),
-      sort:
-        period === 'This month'
-          ? '-lastUpdated,-combinedScore'
-          : '-year,-month,-lastUpdated,-combinedScore',
-      limit: 1000,
-      depth: 0,
-      // Leaderboard reads are public, but only the selected fields below are returned.
-      overrideAccess: true,
-    })
+    let result
 
-    const latestEntryByUser = new Map<
-      string,
-      (typeof result.docs)[number]
-    >()
+    if (period === 'Friends') {
+      if (!user) {
+        return NextResponse.json({ error: 'Log in to see your friends.' }, { status: 401 })
+      }
+
+      const friendships = await payload.find({
+        collection: 'friendships',
+        where: {
+          status: { equals: 'accepted' },
+          or: [{ requester: { equals: user.id } }, { recipient: { equals: user.id } }],
+        },
+        limit: 2000,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const friendIds = [
+        ...new Set(
+          friendships.docs
+            .map((friendship) => {
+              const requesterId = getRelationId(friendship.requester)
+              const recipientId = getRelationId(friendship.recipient)
+              return requesterId === String(user.id) ? recipientId : requesterId
+            })
+            .filter((id): id is string => id !== null && id !== String(user.id)),
+        ),
+      ]
+
+      if (friendIds.length === 0) {
+        return NextResponse.json({ entries: [] }, { headers: { 'Cache-Control': 'no-store' } })
+      }
+
+      result = await payload.find({
+        collection: 'leaderboard',
+        where: {
+          user: { in: friendIds },
+          year: { equals: now.getFullYear() },
+          month: { equals: now.getMonth() + 1 },
+        },
+        sort: '-lastUpdated,-combinedScore',
+        limit: 1000,
+        depth: 0,
+        overrideAccess: true,
+      })
+    } else {
+      result = await payload.find({
+        collection: 'leaderboard',
+        ...(period === 'This month'
+          ? {
+              where: {
+                year: { equals: now.getFullYear() },
+                month: { equals: now.getMonth() + 1 },
+              },
+            }
+          : {}),
+        sort:
+          period === 'This month'
+            ? '-lastUpdated,-combinedScore'
+            : '-year,-month,-lastUpdated,-combinedScore',
+        limit: 1000,
+        depth: 0,
+        // Leaderboard reads are public, but only the selected fields below are returned.
+        overrideAccess: true,
+      })
+    }
+
+    const latestEntryByUser = new Map<string, (typeof result.docs)[number]>()
 
     for (const entry of result.docs) {
-      const relatedUserId = getRelatedUserId(entry.user)
+      const relatedUserId = getRelationId(entry.user)
 
       if (relatedUserId && !latestEntryByUser.has(relatedUserId)) {
         latestEntryByUser.set(relatedUserId, entry)
       }
     }
 
+    const getOptimizationPoints = (entry: (typeof result.docs)[number]) =>
+      entry.optimizationPoints ??
+      Math.max(
+        0,
+        numberOrZero(entry.combinedScore) -
+          numberOrZero(entry.environmentalScore) -
+          numberOrZero(entry.animalImpactScore) -
+          numberOrZero(entry.plantBasedScore) -
+          numberOrZero(entry.referralPoints),
+      )
+    const getCurrentScore = (entry: (typeof result.docs)[number]) =>
+      numberOrZero(entry.plantBasedScore) +
+      getOptimizationPoints(entry) +
+      numberOrZero(entry.referralPoints)
+
     const rankedEntries = [...latestEntryByUser.values()].sort(
       (a, b) =>
-        getNumber(b.combinedScore) - getNumber(a.combinedScore) ||
-        a.displayName.localeCompare(b.displayName),
+        getCurrentScore(b) - getCurrentScore(a) || a.displayName.localeCompare(b.displayName),
     )
 
     const currentEntry = loggedInUserId
-      ? rankedEntries.find(
-          (entry) => getRelatedUserId(entry.user) === loggedInUserId,
-        )
+      ? rankedEntries.find((entry) => getRelationId(entry.user) === loggedInUserId)
       : undefined
 
     const entries = rankedEntries.map((entry, index) => ({
       id: String(entry.id),
       displayName: entry.displayName || 'Planet Pal',
-      month: getNumber(entry.month),
-      year: getNumber(entry.year),
-      animalImpactScore: getNumber(entry.animalImpactScore),
-      environmentalScore: getNumber(entry.environmentalScore),
-      plantBasedScore: getNumber(entry.plantBasedScore),
-      combinedScore: getNumber(entry.combinedScore),
+      month: numberOrZero(entry.month),
+      year: numberOrZero(entry.year),
+      animalImpactScore: 0,
+      environmentalScore: numberOrZero(entry.environmentalScore),
+      plantBasedScore: numberOrZero(entry.plantBasedScore),
+      optimizationPoints: getOptimizationPoints(entry),
+      referralPoints: numberOrZero(entry.referralPoints),
+      combinedScore: getCurrentScore(entry),
       rank: index + 1,
     }))
 
@@ -118,9 +143,6 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('GET /api/leaderboard error:', error)
 
-    return NextResponse.json(
-      { error: 'Unable to load the leaderboard.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Unable to load the leaderboard.' }, { status: 500 })
   }
 }

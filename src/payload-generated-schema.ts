@@ -24,6 +24,269 @@ import {
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
 export const enum__locales = pgEnum('enum__locales', ['en'])
+export const enum_users_diet_type = pgEnum('enum_users_diet_type', [
+  'vegan',
+  'vegetarian',
+  'pescatarian',
+  'omnivore',
+  'other',
+  'not_sure',
+])
+export const enum__users_v_version_diet_type = pgEnum('enum__users_v_version_diet_type', [
+  'vegan',
+  'vegetarian',
+  'pescatarian',
+  'omnivore',
+  'other',
+  'not_sure',
+])
+export const enum_foods_texture_tags = pgEnum('enum_foods_texture_tags', [
+  'smooth',
+  'creamy',
+  'soft',
+  'firm',
+  'chewy',
+  'crunchy',
+  'crispy',
+  'fibrous',
+  'grainy',
+  'liquid',
+  'tender',
+  'flaky',
+  'springy',
+  'custardy',
+  'crumbly',
+  'moist',
+  'dense',
+  'meaty',
+  'juicy',
+  'crisp',
+  'silky',
+  'thick',
+  'spreadable',
+  'powdery',
+  'gel-like',
+  'foamy',
+  'oily',
+])
+export const enum_foods_taste_profiles = pgEnum('enum_foods_taste_profiles', [
+  'sweet',
+  'savory',
+  'bitter',
+  'sour',
+  'umami',
+  'neutral',
+  'mild',
+  'earthy',
+  'smoky',
+  'briny',
+  'tangy',
+  'nutty',
+  'rich',
+  'creamy',
+  'herbal',
+  'salty',
+  'bean-like',
+  'cheesy',
+  'buttery',
+  'coconut',
+])
+export const enum_foods_food_origin = pgEnum('enum_foods_food_origin', [
+  'animal',
+  'plant',
+  'fungi',
+  'algae',
+])
+export const enum_foods_verification_status = pgEnum('enum_foods_verification_status', [
+  'verified',
+  'suggestion',
+])
+export const enum_foods_swap_category = pgEnum('enum_foods_swap_category', [
+  'beef',
+  'poultry',
+  'fish',
+  'pork',
+  'seafood',
+  'dairy',
+  'eggs',
+  'other',
+])
+export const enum_foods_food_category = pgEnum('enum_foods_food_category', [
+  'meat',
+  'poultry',
+  'fish',
+  'seafood',
+  'dairy',
+  'eggs',
+  'legumes',
+  'soy',
+  'grains',
+  'nuts_seeds',
+  'fruits',
+  'vegetables',
+  'fungi',
+  'algae',
+  'other',
+])
+export const enum_foods_animal_product_category = pgEnum('enum_foods_animal_product_category', [
+  'beef',
+  'pork',
+  'poultry',
+  'fish',
+  'seafood',
+  'dairy',
+  'eggs',
+  'other',
+])
+export const enum_foods_serving_unit = pgEnum('enum_foods_serving_unit', [
+  'g',
+  'ml',
+  'pieces',
+  'tbsp',
+  'cups',
+])
+export const enum_foods_pricing_price_tier = pgEnum('enum_foods_pricing_price_tier', [
+  'low',
+  'mid',
+  'high',
+])
+export const enum__foods_v_version_texture_tags = pgEnum('enum__foods_v_version_texture_tags', [
+  'smooth',
+  'creamy',
+  'soft',
+  'firm',
+  'chewy',
+  'crunchy',
+  'crispy',
+  'fibrous',
+  'grainy',
+  'liquid',
+  'tender',
+  'flaky',
+  'springy',
+  'custardy',
+  'crumbly',
+  'moist',
+  'dense',
+  'meaty',
+  'juicy',
+  'crisp',
+  'silky',
+  'thick',
+  'spreadable',
+  'powdery',
+  'gel-like',
+  'foamy',
+  'oily',
+])
+export const enum__foods_v_version_taste_profiles = pgEnum('enum__foods_v_version_taste_profiles', [
+  'sweet',
+  'savory',
+  'bitter',
+  'sour',
+  'umami',
+  'neutral',
+  'mild',
+  'earthy',
+  'smoky',
+  'briny',
+  'tangy',
+  'nutty',
+  'rich',
+  'creamy',
+  'herbal',
+  'salty',
+  'bean-like',
+  'cheesy',
+  'buttery',
+  'coconut',
+])
+export const enum__foods_v_version_food_origin = pgEnum('enum__foods_v_version_food_origin', [
+  'animal',
+  'plant',
+  'fungi',
+  'algae',
+])
+export const enum__foods_v_version_verification_status = pgEnum(
+  'enum__foods_v_version_verification_status',
+  ['verified', 'suggestion'],
+)
+export const enum__foods_v_version_swap_category = pgEnum('enum__foods_v_version_swap_category', [
+  'beef',
+  'poultry',
+  'fish',
+  'pork',
+  'seafood',
+  'dairy',
+  'eggs',
+  'other',
+])
+export const enum__foods_v_version_food_category = pgEnum('enum__foods_v_version_food_category', [
+  'meat',
+  'poultry',
+  'fish',
+  'seafood',
+  'dairy',
+  'eggs',
+  'legumes',
+  'soy',
+  'grains',
+  'nuts_seeds',
+  'fruits',
+  'vegetables',
+  'fungi',
+  'algae',
+  'other',
+])
+export const enum__foods_v_version_animal_product_category = pgEnum(
+  'enum__foods_v_version_animal_product_category',
+  ['beef', 'pork', 'poultry', 'fish', 'seafood', 'dairy', 'eggs', 'other'],
+)
+export const enum__foods_v_version_serving_unit = pgEnum('enum__foods_v_version_serving_unit', [
+  'g',
+  'ml',
+  'pieces',
+  'tbsp',
+  'cups',
+])
+export const enum__foods_v_version_pricing_price_tier = pgEnum(
+  'enum__foods_v_version_pricing_price_tier',
+  ['low', 'mid', 'high'],
+)
+export const enum_sources_source_type = pgEnum('enum_sources_source_type', [
+  'research_paper',
+  'government_dataset',
+  'nutrition_database',
+  'research_report',
+  'other',
+])
+export const enum_sources_evidence_level = pgEnum('enum_sources_evidence_level', [
+  'systematic_review',
+  'peer_reviewed',
+  'institutional',
+  'other',
+])
+export const enum__sources_v_version_source_type = pgEnum('enum__sources_v_version_source_type', [
+  'research_paper',
+  'government_dataset',
+  'nutrition_database',
+  'research_report',
+  'other',
+])
+export const enum__sources_v_version_evidence_level = pgEnum(
+  'enum__sources_v_version_evidence_level',
+  ['systematic_review', 'peer_reviewed', 'institutional', 'other'],
+)
+export const enum_friendships_status = pgEnum('enum_friendships_status', [
+  'pending',
+  'accepted',
+  'declined',
+])
+export const enum__friendships_v_version_status = pgEnum('enum__friendships_v_version_status', [
+  'pending',
+  'accepted',
+  'declined',
+])
 export const enum_payload_llm_instructions_entity_type = pgEnum(
   'enum_payload_llm_instructions_entity_type',
   ['collection', 'global'],
@@ -154,6 +417,48 @@ export const users = pgTable(
   {
     id: serial('id').primaryKey(),
     name: varchar('name').notNull(),
+    wantsMealPlan: boolean('wants_meal_plan').default(false),
+    referralCode: varchar('referral_code'),
+    referralCodeUsed: varchar('referral_code_used'),
+    dietType: enum_users_diet_type('diet_type'),
+    plantBasedGoalDaysPerWeek: numeric('plant_based_goal_days_per_week', { mode: 'number' }),
+    activeSwaps: jsonb('active_swaps'),
+    quizResponses: jsonb('quiz_responses'),
+    cumulativeImpact_co2eSaved: numeric('cumulative_impact_co2e_saved', { mode: 'number' }).default(
+      0,
+    ),
+    cumulativeImpact_waterSaved: numeric('cumulative_impact_water_saved', {
+      mode: 'number',
+    }).default(0),
+    cumulativeImpact_landSaved: numeric('cumulative_impact_land_saved', { mode: 'number' }).default(
+      0,
+    ),
+    cumulativeImpact_animalsSpared: numeric('cumulative_impact_animals_spared', {
+      mode: 'number',
+    }).default(0),
+    cumulativeImpact_plantBasedDays: numeric('cumulative_impact_plant_based_days', {
+      mode: 'number',
+    }).default(0),
+    projectedImpact_co2eSaved: numeric('projected_impact_co2e_saved', { mode: 'number' }).default(
+      0,
+    ),
+    projectedImpact_waterSaved: numeric('projected_impact_water_saved', { mode: 'number' }).default(
+      0,
+    ),
+    projectedImpact_landSaved: numeric('projected_impact_land_saved', { mode: 'number' }).default(
+      0,
+    ),
+    projectedImpact_animalsSpared: numeric('projected_impact_animals_spared', {
+      mode: 'number',
+    }).default(0),
+    lastStreakWeek: varchar('last_streak_week'),
+    currentStreak: numeric('current_streak', { mode: 'number' }).default(0),
+    lastImpactUpdate: timestamp('last_impact_update', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    calculationVersion: varchar('calculation_version'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -178,6 +483,8 @@ export const users = pgTable(
     lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
   },
   (columns) => [
+    uniqueIndex('users_referral_code_idx').on(columns.referralCode),
+    index('users_referral_code_used_idx').on(columns.referralCodeUsed),
     index('users_updated_at_idx').on(columns.updatedAt),
     index('users_created_at_idx').on(columns.createdAt),
     uniqueIndex('users_email_idx').on(columns.email),
@@ -253,6 +560,50 @@ export const _users_v = pgTable(
       onDelete: 'set null',
     }),
     version_name: varchar('version_name').notNull(),
+    version_wantsMealPlan: boolean('version_wants_meal_plan').default(false),
+    version_referralCode: varchar('version_referral_code'),
+    version_referralCodeUsed: varchar('version_referral_code_used'),
+    version_dietType: enum__users_v_version_diet_type('version_diet_type'),
+    version_plantBasedGoalDaysPerWeek: numeric('version_plant_based_goal_days_per_week', {
+      mode: 'number',
+    }),
+    version_activeSwaps: jsonb('version_active_swaps'),
+    version_quizResponses: jsonb('version_quiz_responses'),
+    version_cumulativeImpact_co2eSaved: numeric('version_cumulative_impact_co2e_saved', {
+      mode: 'number',
+    }).default(0),
+    version_cumulativeImpact_waterSaved: numeric('version_cumulative_impact_water_saved', {
+      mode: 'number',
+    }).default(0),
+    version_cumulativeImpact_landSaved: numeric('version_cumulative_impact_land_saved', {
+      mode: 'number',
+    }).default(0),
+    version_cumulativeImpact_animalsSpared: numeric('version_cumulative_impact_animals_spared', {
+      mode: 'number',
+    }).default(0),
+    version_cumulativeImpact_plantBasedDays: numeric('version_cumulative_impact_plant_based_days', {
+      mode: 'number',
+    }).default(0),
+    version_projectedImpact_co2eSaved: numeric('version_projected_impact_co2e_saved', {
+      mode: 'number',
+    }).default(0),
+    version_projectedImpact_waterSaved: numeric('version_projected_impact_water_saved', {
+      mode: 'number',
+    }).default(0),
+    version_projectedImpact_landSaved: numeric('version_projected_impact_land_saved', {
+      mode: 'number',
+    }).default(0),
+    version_projectedImpact_animalsSpared: numeric('version_projected_impact_animals_spared', {
+      mode: 'number',
+    }).default(0),
+    version_lastStreakWeek: varchar('version_last_streak_week'),
+    version_currentStreak: numeric('version_current_streak', { mode: 'number' }).default(0),
+    version_lastImpactUpdate: timestamp('version_last_impact_update', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_calculationVersion: varchar('version_calculation_version'),
     version_updatedAt: timestamp('version_updated_at', {
       mode: 'string',
       withTimezone: true,
@@ -292,6 +643,8 @@ export const _users_v = pgTable(
   },
   (columns) => [
     index('_users_v_parent_idx').on(columns.parent),
+    index('_users_v_version_version_referral_code_idx').on(columns.version_referralCode),
+    index('_users_v_version_version_referral_code_used_idx').on(columns.version_referralCodeUsed),
     index('_users_v_version_version_updated_at_idx').on(columns.version_updatedAt),
     index('_users_v_version_version_created_at_idx').on(columns.version_createdAt),
     index('_users_v_version_version_email_idx').on(columns.version_email),
@@ -778,6 +1131,770 @@ export const _tags_v_rels = pgTable(
   ],
 )
 
+export const foods_texture_tags = pgTable(
+  'foods_texture_tags',
+  {
+    order: integer('order').notNull(),
+    parent: integer('parent_id').notNull(),
+    value: enum_foods_texture_tags('value'),
+    id: serial('id').primaryKey(),
+  },
+  (columns) => [
+    index('foods_texture_tags_order_idx').on(columns.order),
+    index('foods_texture_tags_parent_idx').on(columns.parent),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [foods.id],
+      name: 'foods_texture_tags_parent_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const foods_taste_profiles = pgTable(
+  'foods_taste_profiles',
+  {
+    order: integer('order').notNull(),
+    parent: integer('parent_id').notNull(),
+    value: enum_foods_taste_profiles('value'),
+    id: serial('id').primaryKey(),
+  },
+  (columns) => [
+    index('foods_taste_profiles_order_idx').on(columns.order),
+    index('foods_taste_profiles_parent_idx').on(columns.parent),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [foods.id],
+      name: 'foods_taste_profiles_parent_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const foods = pgTable(
+  'foods',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    description: varchar('description'),
+    image: integer('image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    foodOrigin: enum_foods_food_origin('food_origin').notNull(),
+    verificationStatus: enum_foods_verification_status('verification_status').notNull(),
+    swapCategory: enum_foods_swap_category('swap_category').notNull(),
+    foodCategory: enum_foods_food_category('food_category'),
+    animalProductCategory: enum_foods_animal_product_category('animal_product_category'),
+    servingSize: numeric('serving_size', { mode: 'number' }),
+    servingUnit: enum_foods_serving_unit('serving_unit'),
+    nutrition_calories: numeric('nutrition_calories', { mode: 'number' }),
+    nutrition_proteinG: numeric('nutrition_protein_g', { mode: 'number' }),
+    nutrition_fiberG: numeric('nutrition_fiber_g', { mode: 'number' }),
+    nutrition_ironMg: numeric('nutrition_iron_mg', { mode: 'number' }),
+    nutrition_calciumMg: numeric('nutrition_calcium_mg', { mode: 'number' }),
+    nutrition_vitaminB12Mcg: numeric('nutrition_vitamin_b12_mcg', { mode: 'number' }),
+    nutrition_omega3G: numeric('nutrition_omega3g', { mode: 'number' }),
+    nutrition_zincMg: numeric('nutrition_zinc_mg', { mode: 'number' }),
+    nutrition_iodineMcg: numeric('nutrition_iodine_mcg', { mode: 'number' }),
+    environmentalImpact_co2eKg: numeric('environmental_impact_co2e_kg', { mode: 'number' }),
+    environmentalImpact_waterLiters: numeric('environmental_impact_water_liters', {
+      mode: 'number',
+    }),
+    environmentalImpact_landM2: numeric('environmental_impact_land_m2', { mode: 'number' }),
+    environmentalImpact_animalsPer100g: numeric('environmental_impact_animals_per100g', {
+      mode: 'number',
+    }),
+    environmentalImpact_impactScorePer100g: numeric('environmental_impact_impact_score_per100g', {
+      mode: 'number',
+    }),
+    pricing_avgCostPer100g: numeric('pricing_avg_cost_per100g', { mode: 'number' }),
+    pricing_costPer20gProtein: numeric('pricing_cost_per20g_protein', { mode: 'number' }),
+    pricing_priceTier: enum_foods_pricing_price_tier('pricing_price_tier'),
+    affiliateUrl: varchar('affiliate_url'),
+    affiliateLabel: varchar('affiliate_label'),
+    isActive: boolean('is_active').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('foods_image_idx').on(columns.image),
+    index('foods_updated_at_idx').on(columns.updatedAt),
+    index('foods_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const foods_rels = pgTable(
+  'foods_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    sourcesID: integer('sources_id'),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('foods_rels_order_idx').on(columns.order),
+    index('foods_rels_parent_idx').on(columns.parent),
+    index('foods_rels_path_idx').on(columns.path),
+    index('foods_rels_sources_id_idx').on(columns.sourcesID),
+    index('foods_rels_admins_id_idx').on(columns.adminsID),
+    index('foods_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [foods.id],
+      name: 'foods_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['sourcesID']],
+      foreignColumns: [sources.id],
+      name: 'foods_rels_sources_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: 'foods_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'foods_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const _foods_v_version_texture_tags = pgTable(
+  '_foods_v_version_texture_tags',
+  {
+    order: integer('order').notNull(),
+    parent: integer('parent_id').notNull(),
+    value: enum__foods_v_version_texture_tags('value'),
+    id: serial('id').primaryKey(),
+  },
+  (columns) => [
+    index('_foods_v_version_texture_tags_order_idx').on(columns.order),
+    index('_foods_v_version_texture_tags_parent_idx').on(columns.parent),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [_foods_v.id],
+      name: '_foods_v_version_texture_tags_parent_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const _foods_v_version_taste_profiles = pgTable(
+  '_foods_v_version_taste_profiles',
+  {
+    order: integer('order').notNull(),
+    parent: integer('parent_id').notNull(),
+    value: enum__foods_v_version_taste_profiles('value'),
+    id: serial('id').primaryKey(),
+  },
+  (columns) => [
+    index('_foods_v_version_taste_profiles_order_idx').on(columns.order),
+    index('_foods_v_version_taste_profiles_parent_idx').on(columns.parent),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [_foods_v.id],
+      name: '_foods_v_version_taste_profiles_parent_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const _foods_v = pgTable(
+  '_foods_v',
+  {
+    id: serial('id').primaryKey(),
+    parent: integer('parent_id').references(() => foods.id, {
+      onDelete: 'set null',
+    }),
+    version_name: varchar('version_name').notNull(),
+    version_description: varchar('version_description'),
+    version_image: integer('version_image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    version_foodOrigin: enum__foods_v_version_food_origin('version_food_origin').notNull(),
+    version_verificationStatus: enum__foods_v_version_verification_status(
+      'version_verification_status',
+    ).notNull(),
+    version_swapCategory: enum__foods_v_version_swap_category('version_swap_category').notNull(),
+    version_foodCategory: enum__foods_v_version_food_category('version_food_category'),
+    version_animalProductCategory: enum__foods_v_version_animal_product_category(
+      'version_animal_product_category',
+    ),
+    version_servingSize: numeric('version_serving_size', { mode: 'number' }),
+    version_servingUnit: enum__foods_v_version_serving_unit('version_serving_unit'),
+    version_nutrition_calories: numeric('version_nutrition_calories', { mode: 'number' }),
+    version_nutrition_proteinG: numeric('version_nutrition_protein_g', { mode: 'number' }),
+    version_nutrition_fiberG: numeric('version_nutrition_fiber_g', { mode: 'number' }),
+    version_nutrition_ironMg: numeric('version_nutrition_iron_mg', { mode: 'number' }),
+    version_nutrition_calciumMg: numeric('version_nutrition_calcium_mg', { mode: 'number' }),
+    version_nutrition_vitaminB12Mcg: numeric('version_nutrition_vitamin_b12_mcg', {
+      mode: 'number',
+    }),
+    version_nutrition_omega3G: numeric('version_nutrition_omega3g', { mode: 'number' }),
+    version_nutrition_zincMg: numeric('version_nutrition_zinc_mg', { mode: 'number' }),
+    version_nutrition_iodineMcg: numeric('version_nutrition_iodine_mcg', { mode: 'number' }),
+    version_environmentalImpact_co2eKg: numeric('version_environmental_impact_co2e_kg', {
+      mode: 'number',
+    }),
+    version_environmentalImpact_waterLiters: numeric('version_environmental_impact_water_liters', {
+      mode: 'number',
+    }),
+    version_environmentalImpact_landM2: numeric('version_environmental_impact_land_m2', {
+      mode: 'number',
+    }),
+    version_environmentalImpact_animalsPer100g: numeric(
+      'version_environmental_impact_animals_per100g',
+      { mode: 'number' },
+    ),
+    version_environmentalImpact_impactScorePer100g: numeric(
+      'version_environmental_impact_impact_score_per100g',
+      { mode: 'number' },
+    ),
+    version_pricing_avgCostPer100g: numeric('version_pricing_avg_cost_per100g', { mode: 'number' }),
+    version_pricing_costPer20gProtein: numeric('version_pricing_cost_per20g_protein', {
+      mode: 'number',
+    }),
+    version_pricing_priceTier: enum__foods_v_version_pricing_price_tier(
+      'version_pricing_price_tier',
+    ),
+    version_affiliateUrl: varchar('version_affiliate_url'),
+    version_affiliateLabel: varchar('version_affiliate_label'),
+    version_isActive: boolean('version_is_active').default(true),
+    version_updatedAt: timestamp('version_updated_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp('version_created_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('_foods_v_parent_idx').on(columns.parent),
+    index('_foods_v_version_version_image_idx').on(columns.version_image),
+    index('_foods_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_foods_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_foods_v_created_at_idx').on(columns.createdAt),
+    index('_foods_v_updated_at_idx').on(columns.updatedAt),
+  ],
+)
+
+export const _foods_v_rels = pgTable(
+  '_foods_v_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    sourcesID: integer('sources_id'),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('_foods_v_rels_order_idx').on(columns.order),
+    index('_foods_v_rels_parent_idx').on(columns.parent),
+    index('_foods_v_rels_path_idx').on(columns.path),
+    index('_foods_v_rels_sources_id_idx').on(columns.sourcesID),
+    index('_foods_v_rels_admins_id_idx').on(columns.adminsID),
+    index('_foods_v_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [_foods_v.id],
+      name: '_foods_v_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['sourcesID']],
+      foreignColumns: [sources.id],
+      name: '_foods_v_rels_sources_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: '_foods_v_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: '_foods_v_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const sources = pgTable(
+  'sources',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    authors: varchar('authors'),
+    publisher: varchar('publisher'),
+    publicationYear: numeric('publication_year', { mode: 'number' }),
+    sourceType: enum_sources_source_type('source_type').notNull(),
+    url: varchar('url'),
+    doi: varchar('doi'),
+    evidenceLevel: enum_sources_evidence_level('evidence_level'),
+    publicationDate: timestamp('publication_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    accessedAt: timestamp('accessed_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    notes: varchar('notes'),
+    isActive: boolean('is_active').default(true),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('sources_updated_at_idx').on(columns.updatedAt),
+    index('sources_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const sources_rels = pgTable(
+  'sources_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('sources_rels_order_idx').on(columns.order),
+    index('sources_rels_parent_idx').on(columns.parent),
+    index('sources_rels_path_idx').on(columns.path),
+    index('sources_rels_admins_id_idx').on(columns.adminsID),
+    index('sources_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [sources.id],
+      name: 'sources_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: 'sources_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'sources_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const _sources_v = pgTable(
+  '_sources_v',
+  {
+    id: serial('id').primaryKey(),
+    parent: integer('parent_id').references(() => sources.id, {
+      onDelete: 'set null',
+    }),
+    version_title: varchar('version_title').notNull(),
+    version_authors: varchar('version_authors'),
+    version_publisher: varchar('version_publisher'),
+    version_publicationYear: numeric('version_publication_year', { mode: 'number' }),
+    version_sourceType: enum__sources_v_version_source_type('version_source_type').notNull(),
+    version_url: varchar('version_url'),
+    version_doi: varchar('version_doi'),
+    version_evidenceLevel: enum__sources_v_version_evidence_level('version_evidence_level'),
+    version_publicationDate: timestamp('version_publication_date', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_accessedAt: timestamp('version_accessed_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_notes: varchar('version_notes'),
+    version_isActive: boolean('version_is_active').default(true),
+    version_updatedAt: timestamp('version_updated_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp('version_created_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('_sources_v_parent_idx').on(columns.parent),
+    index('_sources_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_sources_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_sources_v_created_at_idx').on(columns.createdAt),
+    index('_sources_v_updated_at_idx').on(columns.updatedAt),
+  ],
+)
+
+export const _sources_v_rels = pgTable(
+  '_sources_v_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('_sources_v_rels_order_idx').on(columns.order),
+    index('_sources_v_rels_parent_idx').on(columns.parent),
+    index('_sources_v_rels_path_idx').on(columns.path),
+    index('_sources_v_rels_admins_id_idx').on(columns.adminsID),
+    index('_sources_v_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [_sources_v.id],
+      name: '_sources_v_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: '_sources_v_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: '_sources_v_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const leaderboard = pgTable(
+  'leaderboard',
+  {
+    id: serial('id').primaryKey(),
+    user: integer('user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    displayName: varchar('display_name').notNull(),
+    month: numeric('month', { mode: 'number' }).notNull(),
+    year: numeric('year', { mode: 'number' }).notNull(),
+    animalImpactScore: numeric('animal_impact_score', { mode: 'number' }).default(0),
+    environmentalScore: numeric('environmental_score', { mode: 'number' }).default(0),
+    plantBasedScore: numeric('plant_based_score', { mode: 'number' }).default(0),
+    optimizationPoints: numeric('optimization_points', { mode: 'number' }).default(0),
+    referralPoints: numeric('referral_points', { mode: 'number' }).default(0),
+    combinedScore: numeric('combined_score', { mode: 'number' }).default(0),
+    lastUpdated: timestamp('last_updated', { mode: 'string', withTimezone: true, precision: 3 }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('leaderboard_user_idx').on(columns.user),
+    index('leaderboard_updated_at_idx').on(columns.updatedAt),
+    index('leaderboard_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const leaderboard_rels = pgTable(
+  'leaderboard_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('leaderboard_rels_order_idx').on(columns.order),
+    index('leaderboard_rels_parent_idx').on(columns.parent),
+    index('leaderboard_rels_path_idx').on(columns.path),
+    index('leaderboard_rels_admins_id_idx').on(columns.adminsID),
+    index('leaderboard_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [leaderboard.id],
+      name: 'leaderboard_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: 'leaderboard_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'leaderboard_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const _leaderboard_v = pgTable(
+  '_leaderboard_v',
+  {
+    id: serial('id').primaryKey(),
+    parent: integer('parent_id').references(() => leaderboard.id, {
+      onDelete: 'set null',
+    }),
+    version_user: integer('version_user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    version_displayName: varchar('version_display_name').notNull(),
+    version_month: numeric('version_month', { mode: 'number' }).notNull(),
+    version_year: numeric('version_year', { mode: 'number' }).notNull(),
+    version_animalImpactScore: numeric('version_animal_impact_score', { mode: 'number' }).default(
+      0,
+    ),
+    version_environmentalScore: numeric('version_environmental_score', { mode: 'number' }).default(
+      0,
+    ),
+    version_plantBasedScore: numeric('version_plant_based_score', { mode: 'number' }).default(0),
+    version_optimizationPoints: numeric('version_optimization_points', { mode: 'number' }).default(
+      0,
+    ),
+    version_referralPoints: numeric('version_referral_points', { mode: 'number' }).default(0),
+    version_combinedScore: numeric('version_combined_score', { mode: 'number' }).default(0),
+    version_lastUpdated: timestamp('version_last_updated', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_updatedAt: timestamp('version_updated_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp('version_created_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('_leaderboard_v_parent_idx').on(columns.parent),
+    index('_leaderboard_v_version_version_user_idx').on(columns.version_user),
+    index('_leaderboard_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_leaderboard_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_leaderboard_v_created_at_idx').on(columns.createdAt),
+    index('_leaderboard_v_updated_at_idx').on(columns.updatedAt),
+  ],
+)
+
+export const _leaderboard_v_rels = pgTable(
+  '_leaderboard_v_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('_leaderboard_v_rels_order_idx').on(columns.order),
+    index('_leaderboard_v_rels_parent_idx').on(columns.parent),
+    index('_leaderboard_v_rels_path_idx').on(columns.path),
+    index('_leaderboard_v_rels_admins_id_idx').on(columns.adminsID),
+    index('_leaderboard_v_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [_leaderboard_v.id],
+      name: '_leaderboard_v_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: '_leaderboard_v_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: '_leaderboard_v_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const friendships = pgTable(
+  'friendships',
+  {
+    id: serial('id').primaryKey(),
+    requester: integer('requester_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    recipient: integer('recipient_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    status: enum_friendships_status('status').notNull().default('pending'),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('friendships_requester_idx').on(columns.requester),
+    index('friendships_recipient_idx').on(columns.recipient),
+    index('friendships_status_idx').on(columns.status),
+    index('friendships_updated_at_idx').on(columns.updatedAt),
+    index('friendships_created_at_idx').on(columns.createdAt),
+  ],
+)
+
+export const friendships_rels = pgTable(
+  'friendships_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('friendships_rels_order_idx').on(columns.order),
+    index('friendships_rels_parent_idx').on(columns.parent),
+    index('friendships_rels_path_idx').on(columns.path),
+    index('friendships_rels_admins_id_idx').on(columns.adminsID),
+    index('friendships_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [friendships.id],
+      name: 'friendships_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: 'friendships_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: 'friendships_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
+export const _friendships_v = pgTable(
+  '_friendships_v',
+  {
+    id: serial('id').primaryKey(),
+    parent: integer('parent_id').references(() => friendships.id, {
+      onDelete: 'set null',
+    }),
+    version_requester: integer('version_requester_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    version_recipient: integer('version_recipient_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'set null',
+      }),
+    version_status: enum__friendships_v_version_status('version_status')
+      .notNull()
+      .default('pending'),
+    version_updatedAt: timestamp('version_updated_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    version_createdAt: timestamp('version_created_at', {
+      mode: 'string',
+      withTimezone: true,
+      precision: 3,
+    }),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    index('_friendships_v_parent_idx').on(columns.parent),
+    index('_friendships_v_version_version_requester_idx').on(columns.version_requester),
+    index('_friendships_v_version_version_recipient_idx').on(columns.version_recipient),
+    index('_friendships_v_version_version_status_idx').on(columns.version_status),
+    index('_friendships_v_version_version_updated_at_idx').on(columns.version_updatedAt),
+    index('_friendships_v_version_version_created_at_idx').on(columns.version_createdAt),
+    index('_friendships_v_created_at_idx').on(columns.createdAt),
+    index('_friendships_v_updated_at_idx').on(columns.updatedAt),
+  ],
+)
+
+export const _friendships_v_rels = pgTable(
+  '_friendships_v_rels',
+  {
+    id: serial('id').primaryKey(),
+    order: integer('order'),
+    parent: integer('parent_id').notNull(),
+    path: varchar('path').notNull(),
+    adminsID: integer('admins_id'),
+    usersID: integer('users_id'),
+  },
+  (columns) => [
+    index('_friendships_v_rels_order_idx').on(columns.order),
+    index('_friendships_v_rels_parent_idx').on(columns.parent),
+    index('_friendships_v_rels_path_idx').on(columns.path),
+    index('_friendships_v_rels_admins_id_idx').on(columns.adminsID),
+    index('_friendships_v_rels_users_id_idx').on(columns.usersID),
+    foreignKey({
+      columns: [columns['parent']],
+      foreignColumns: [_friendships_v.id],
+      name: '_friendships_v_rels_parent_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['adminsID']],
+      foreignColumns: [admins.id],
+      name: '_friendships_v_rels_admins_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['usersID']],
+      foreignColumns: [users.id],
+      name: '_friendships_v_rels_users_fk',
+    }).onDelete('cascade'),
+  ],
+)
+
 export const payload_kv = pgTable(
   'payload_kv',
   {
@@ -819,6 +1936,10 @@ export const payload_locked_documents_rels = pgTable(
     mediaID: integer('media_id'),
     foldersID: integer('folders_id'),
     tagsID: integer('tags_id'),
+    foodsID: integer('foods_id'),
+    sourcesID: integer('sources_id'),
+    leaderboardID: integer('leaderboard_id'),
+    friendshipsID: integer('friendships_id'),
   },
   (columns) => [
     index('payload_locked_documents_rels_order_idx').on(columns.order),
@@ -829,6 +1950,10 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
     index('payload_locked_documents_rels_folders_id_idx').on(columns.foldersID),
     index('payload_locked_documents_rels_tags_id_idx').on(columns.tagsID),
+    index('payload_locked_documents_rels_foods_id_idx').on(columns.foodsID),
+    index('payload_locked_documents_rels_sources_id_idx').on(columns.sourcesID),
+    index('payload_locked_documents_rels_leaderboard_id_idx').on(columns.leaderboardID),
+    index('payload_locked_documents_rels_friendships_id_idx').on(columns.friendshipsID),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
@@ -858,6 +1983,26 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['tagsID']],
       foreignColumns: [tags.id],
       name: 'payload_locked_documents_rels_tags_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['foodsID']],
+      foreignColumns: [foods.id],
+      name: 'payload_locked_documents_rels_foods_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['sourcesID']],
+      foreignColumns: [sources.id],
+      name: 'payload_locked_documents_rels_sources_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['leaderboardID']],
+      foreignColumns: [leaderboard.id],
+      name: 'payload_locked_documents_rels_leaderboard_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['friendshipsID']],
+      foreignColumns: [friendships.id],
+      name: 'payload_locked_documents_rels_friendships_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -1281,6 +2426,298 @@ export const relations__tags_v = relations(_tags_v, ({ one, many }) => ({
     relationName: '_rels',
   }),
 }))
+export const relations_foods_texture_tags = relations(foods_texture_tags, ({ one }) => ({
+  parent: one(foods, {
+    fields: [foods_texture_tags.parent],
+    references: [foods.id],
+    relationName: 'textureTags',
+  }),
+}))
+export const relations_foods_taste_profiles = relations(foods_taste_profiles, ({ one }) => ({
+  parent: one(foods, {
+    fields: [foods_taste_profiles.parent],
+    references: [foods.id],
+    relationName: 'tasteProfiles',
+  }),
+}))
+export const relations_foods_rels = relations(foods_rels, ({ one }) => ({
+  parent: one(foods, {
+    fields: [foods_rels.parent],
+    references: [foods.id],
+    relationName: '_rels',
+  }),
+  sourcesID: one(sources, {
+    fields: [foods_rels.sourcesID],
+    references: [sources.id],
+    relationName: 'sources',
+  }),
+  adminsID: one(admins, {
+    fields: [foods_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [foods_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations_foods = relations(foods, ({ one, many }) => ({
+  image: one(media, {
+    fields: [foods.image],
+    references: [media.id],
+    relationName: 'image',
+  }),
+  textureTags: many(foods_texture_tags, {
+    relationName: 'textureTags',
+  }),
+  tasteProfiles: many(foods_taste_profiles, {
+    relationName: 'tasteProfiles',
+  }),
+  _rels: many(foods_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations__foods_v_version_texture_tags = relations(
+  _foods_v_version_texture_tags,
+  ({ one }) => ({
+    parent: one(_foods_v, {
+      fields: [_foods_v_version_texture_tags.parent],
+      references: [_foods_v.id],
+      relationName: 'version_textureTags',
+    }),
+  }),
+)
+export const relations__foods_v_version_taste_profiles = relations(
+  _foods_v_version_taste_profiles,
+  ({ one }) => ({
+    parent: one(_foods_v, {
+      fields: [_foods_v_version_taste_profiles.parent],
+      references: [_foods_v.id],
+      relationName: 'version_tasteProfiles',
+    }),
+  }),
+)
+export const relations__foods_v_rels = relations(_foods_v_rels, ({ one }) => ({
+  parent: one(_foods_v, {
+    fields: [_foods_v_rels.parent],
+    references: [_foods_v.id],
+    relationName: '_rels',
+  }),
+  sourcesID: one(sources, {
+    fields: [_foods_v_rels.sourcesID],
+    references: [sources.id],
+    relationName: 'sources',
+  }),
+  adminsID: one(admins, {
+    fields: [_foods_v_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [_foods_v_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations__foods_v = relations(_foods_v, ({ one, many }) => ({
+  parent: one(foods, {
+    fields: [_foods_v.parent],
+    references: [foods.id],
+    relationName: 'parent',
+  }),
+  version_image: one(media, {
+    fields: [_foods_v.version_image],
+    references: [media.id],
+    relationName: 'version_image',
+  }),
+  version_textureTags: many(_foods_v_version_texture_tags, {
+    relationName: 'version_textureTags',
+  }),
+  version_tasteProfiles: many(_foods_v_version_taste_profiles, {
+    relationName: 'version_tasteProfiles',
+  }),
+  _rels: many(_foods_v_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_sources_rels = relations(sources_rels, ({ one }) => ({
+  parent: one(sources, {
+    fields: [sources_rels.parent],
+    references: [sources.id],
+    relationName: '_rels',
+  }),
+  adminsID: one(admins, {
+    fields: [sources_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [sources_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations_sources = relations(sources, ({ many }) => ({
+  _rels: many(sources_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations__sources_v_rels = relations(_sources_v_rels, ({ one }) => ({
+  parent: one(_sources_v, {
+    fields: [_sources_v_rels.parent],
+    references: [_sources_v.id],
+    relationName: '_rels',
+  }),
+  adminsID: one(admins, {
+    fields: [_sources_v_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [_sources_v_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations__sources_v = relations(_sources_v, ({ one, many }) => ({
+  parent: one(sources, {
+    fields: [_sources_v.parent],
+    references: [sources.id],
+    relationName: 'parent',
+  }),
+  _rels: many(_sources_v_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_leaderboard_rels = relations(leaderboard_rels, ({ one }) => ({
+  parent: one(leaderboard, {
+    fields: [leaderboard_rels.parent],
+    references: [leaderboard.id],
+    relationName: '_rels',
+  }),
+  adminsID: one(admins, {
+    fields: [leaderboard_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [leaderboard_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations_leaderboard = relations(leaderboard, ({ one, many }) => ({
+  user: one(users, {
+    fields: [leaderboard.user],
+    references: [users.id],
+    relationName: 'user',
+  }),
+  _rels: many(leaderboard_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations__leaderboard_v_rels = relations(_leaderboard_v_rels, ({ one }) => ({
+  parent: one(_leaderboard_v, {
+    fields: [_leaderboard_v_rels.parent],
+    references: [_leaderboard_v.id],
+    relationName: '_rels',
+  }),
+  adminsID: one(admins, {
+    fields: [_leaderboard_v_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [_leaderboard_v_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations__leaderboard_v = relations(_leaderboard_v, ({ one, many }) => ({
+  parent: one(leaderboard, {
+    fields: [_leaderboard_v.parent],
+    references: [leaderboard.id],
+    relationName: 'parent',
+  }),
+  version_user: one(users, {
+    fields: [_leaderboard_v.version_user],
+    references: [users.id],
+    relationName: 'version_user',
+  }),
+  _rels: many(_leaderboard_v_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations_friendships_rels = relations(friendships_rels, ({ one }) => ({
+  parent: one(friendships, {
+    fields: [friendships_rels.parent],
+    references: [friendships.id],
+    relationName: '_rels',
+  }),
+  adminsID: one(admins, {
+    fields: [friendships_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [friendships_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations_friendships = relations(friendships, ({ one, many }) => ({
+  requester: one(users, {
+    fields: [friendships.requester],
+    references: [users.id],
+    relationName: 'requester',
+  }),
+  recipient: one(users, {
+    fields: [friendships.recipient],
+    references: [users.id],
+    relationName: 'recipient',
+  }),
+  _rels: many(friendships_rels, {
+    relationName: '_rels',
+  }),
+}))
+export const relations__friendships_v_rels = relations(_friendships_v_rels, ({ one }) => ({
+  parent: one(_friendships_v, {
+    fields: [_friendships_v_rels.parent],
+    references: [_friendships_v.id],
+    relationName: '_rels',
+  }),
+  adminsID: one(admins, {
+    fields: [_friendships_v_rels.adminsID],
+    references: [admins.id],
+    relationName: 'admins',
+  }),
+  usersID: one(users, {
+    fields: [_friendships_v_rels.usersID],
+    references: [users.id],
+    relationName: 'users',
+  }),
+}))
+export const relations__friendships_v = relations(_friendships_v, ({ one, many }) => ({
+  parent: one(friendships, {
+    fields: [_friendships_v.parent],
+    references: [friendships.id],
+    relationName: 'parent',
+  }),
+  version_requester: one(users, {
+    fields: [_friendships_v.version_requester],
+    references: [users.id],
+    relationName: 'version_requester',
+  }),
+  version_recipient: one(users, {
+    fields: [_friendships_v.version_recipient],
+    references: [users.id],
+    relationName: 'version_recipient',
+  }),
+  _rels: many(_friendships_v_rels, {
+    relationName: '_rels',
+  }),
+}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
@@ -1314,6 +2751,26 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels.tagsID],
       references: [tags.id],
       relationName: 'tags',
+    }),
+    foodsID: one(foods, {
+      fields: [payload_locked_documents_rels.foodsID],
+      references: [foods.id],
+      relationName: 'foods',
+    }),
+    sourcesID: one(sources, {
+      fields: [payload_locked_documents_rels.sourcesID],
+      references: [sources.id],
+      relationName: 'sources',
+    }),
+    leaderboardID: one(leaderboard, {
+      fields: [payload_locked_documents_rels.leaderboardID],
+      references: [leaderboard.id],
+      relationName: 'leaderboard',
+    }),
+    friendshipsID: one(friendships, {
+      fields: [payload_locked_documents_rels.friendshipsID],
+      references: [friendships.id],
+      relationName: 'friendships',
     }),
   }),
 )
@@ -1382,6 +2839,32 @@ export const relations_payload_llm_instructions = relations(
 
 type DatabaseSchema = {
   enum__locales: typeof enum__locales
+  enum_users_diet_type: typeof enum_users_diet_type
+  enum__users_v_version_diet_type: typeof enum__users_v_version_diet_type
+  enum_foods_texture_tags: typeof enum_foods_texture_tags
+  enum_foods_taste_profiles: typeof enum_foods_taste_profiles
+  enum_foods_food_origin: typeof enum_foods_food_origin
+  enum_foods_verification_status: typeof enum_foods_verification_status
+  enum_foods_swap_category: typeof enum_foods_swap_category
+  enum_foods_food_category: typeof enum_foods_food_category
+  enum_foods_animal_product_category: typeof enum_foods_animal_product_category
+  enum_foods_serving_unit: typeof enum_foods_serving_unit
+  enum_foods_pricing_price_tier: typeof enum_foods_pricing_price_tier
+  enum__foods_v_version_texture_tags: typeof enum__foods_v_version_texture_tags
+  enum__foods_v_version_taste_profiles: typeof enum__foods_v_version_taste_profiles
+  enum__foods_v_version_food_origin: typeof enum__foods_v_version_food_origin
+  enum__foods_v_version_verification_status: typeof enum__foods_v_version_verification_status
+  enum__foods_v_version_swap_category: typeof enum__foods_v_version_swap_category
+  enum__foods_v_version_food_category: typeof enum__foods_v_version_food_category
+  enum__foods_v_version_animal_product_category: typeof enum__foods_v_version_animal_product_category
+  enum__foods_v_version_serving_unit: typeof enum__foods_v_version_serving_unit
+  enum__foods_v_version_pricing_price_tier: typeof enum__foods_v_version_pricing_price_tier
+  enum_sources_source_type: typeof enum_sources_source_type
+  enum_sources_evidence_level: typeof enum_sources_evidence_level
+  enum__sources_v_version_source_type: typeof enum__sources_v_version_source_type
+  enum__sources_v_version_evidence_level: typeof enum__sources_v_version_evidence_level
+  enum_friendships_status: typeof enum_friendships_status
+  enum__friendships_v_version_status: typeof enum__friendships_v_version_status
   enum_payload_llm_instructions_entity_type: typeof enum_payload_llm_instructions_entity_type
   admins_sessions: typeof admins_sessions
   admins: typeof admins
@@ -1404,6 +2887,26 @@ type DatabaseSchema = {
   tags_rels: typeof tags_rels
   _tags_v: typeof _tags_v
   _tags_v_rels: typeof _tags_v_rels
+  foods_texture_tags: typeof foods_texture_tags
+  foods_taste_profiles: typeof foods_taste_profiles
+  foods: typeof foods
+  foods_rels: typeof foods_rels
+  _foods_v_version_texture_tags: typeof _foods_v_version_texture_tags
+  _foods_v_version_taste_profiles: typeof _foods_v_version_taste_profiles
+  _foods_v: typeof _foods_v
+  _foods_v_rels: typeof _foods_v_rels
+  sources: typeof sources
+  sources_rels: typeof sources_rels
+  _sources_v: typeof _sources_v
+  _sources_v_rels: typeof _sources_v_rels
+  leaderboard: typeof leaderboard
+  leaderboard_rels: typeof leaderboard_rels
+  _leaderboard_v: typeof _leaderboard_v
+  _leaderboard_v_rels: typeof _leaderboard_v_rels
+  friendships: typeof friendships
+  friendships_rels: typeof friendships_rels
+  _friendships_v: typeof _friendships_v
+  _friendships_v_rels: typeof _friendships_v_rels
   payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
@@ -1433,6 +2936,26 @@ type DatabaseSchema = {
   relations_tags: typeof relations_tags
   relations__tags_v_rels: typeof relations__tags_v_rels
   relations__tags_v: typeof relations__tags_v
+  relations_foods_texture_tags: typeof relations_foods_texture_tags
+  relations_foods_taste_profiles: typeof relations_foods_taste_profiles
+  relations_foods_rels: typeof relations_foods_rels
+  relations_foods: typeof relations_foods
+  relations__foods_v_version_texture_tags: typeof relations__foods_v_version_texture_tags
+  relations__foods_v_version_taste_profiles: typeof relations__foods_v_version_taste_profiles
+  relations__foods_v_rels: typeof relations__foods_v_rels
+  relations__foods_v: typeof relations__foods_v
+  relations_sources_rels: typeof relations_sources_rels
+  relations_sources: typeof relations_sources
+  relations__sources_v_rels: typeof relations__sources_v_rels
+  relations__sources_v: typeof relations__sources_v
+  relations_leaderboard_rels: typeof relations_leaderboard_rels
+  relations_leaderboard: typeof relations_leaderboard
+  relations__leaderboard_v_rels: typeof relations__leaderboard_v_rels
+  relations__leaderboard_v: typeof relations__leaderboard_v
+  relations_friendships_rels: typeof relations_friendships_rels
+  relations_friendships: typeof relations_friendships
+  relations__friendships_v_rels: typeof relations__friendships_v_rels
+  relations__friendships_v: typeof relations__friendships_v
   relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents

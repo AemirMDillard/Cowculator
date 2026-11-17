@@ -2,16 +2,8 @@ import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from './src/payload.config'
 
-type FoodOrigin = 'animal' | 'plant' | 'fungi' | 'algae';
-type SwapCategory =
-  | 'beef'
-  | 'pork'
-  | 'poultry'
-  | 'fish'
-  | 'seafood'
-  | 'dairy'
-  | 'eggs'
-  | 'other';
+type FoodOrigin = 'animal' | 'plant' | 'fungi' | 'algae'
+type SwapCategory = 'beef' | 'pork' | 'poultry' | 'fish' | 'seafood' | 'dairy' | 'eggs' | 'other'
 
 type FoodCategory =
   | 'meat'
@@ -28,68 +20,157 @@ type FoodCategory =
   | 'vegetables'
   | 'fungi'
   | 'algae'
-  | 'other';
+  | 'other'
 
-type AnimalCategory =
-  | 'beef'
-  | 'pork'
-  | 'poultry'
-  | 'fish'
-  | 'seafood'
-  | 'dairy'
-  | 'eggs'
-  | 'other';
+type AnimalCategory = 'beef' | 'pork' | 'poultry' | 'fish' | 'seafood' | 'dairy' | 'eggs' | 'other'
+
+type TextureTag =
+  | 'smooth'
+  | 'creamy'
+  | 'soft'
+  | 'firm'
+  | 'chewy'
+  | 'crunchy'
+  | 'crispy'
+  | 'fibrous'
+  | 'grainy'
+  | 'liquid'
+  | 'tender'
+  | 'flaky'
+  | 'springy'
+  | 'custardy'
+  | 'crumbly'
+  | 'moist'
+  | 'dense'
+  | 'meaty'
+  | 'juicy'
+  | 'crisp'
+  | 'silky'
+  | 'thick'
+  | 'spreadable'
+  | 'powdery'
+  | 'gel-like'
+  | 'foamy'
+  | 'oily'
+
+type TasteProfile =
+  | 'sweet'
+  | 'savory'
+  | 'bitter'
+  | 'sour'
+  | 'umami'
+  | 'neutral'
+  | 'mild'
+  | 'earthy'
+  | 'smoky'
+  | 'briny'
+  | 'tangy'
+  | 'nutty'
+  | 'rich'
+  | 'creamy'
+  | 'herbal'
+  | 'salty'
+  | 'bean-like'
+  | 'cheesy'
+  | 'buttery'
+  | 'coconut'
+
+type SourceKey = 'nutrition' | 'environmentalImpact' | 'waterFootprint'
 
 type Food = {
-  name: string;
-  description: string;
-  image: null;
-  foodOrigin: FoodOrigin;
-  verificationStatus: 'verified' | 'suggestion';
-  swapCategory: SwapCategory;
-  foodCategory: FoodCategory;
-  animalProductCategory: AnimalCategory | null;
-  textureTags: string[];
-  tasteProfiles: string[];
-  servingSize: number;
-  servingUnit: string;
+  name: string
+  description: string
+  image: null
+  foodOrigin: FoodOrigin
+  verificationStatus: 'verified' | 'suggestion'
+  swapCategory: SwapCategory
+  foodCategory: FoodCategory
+  animalProductCategory: AnimalCategory | null
+  textureTags: TextureTag[]
+  tasteProfiles: TasteProfile[]
+  servingSize: number
+  servingUnit: 'g' | 'ml' | 'pieces' | 'tbsp' | 'cups'
   nutrition: {
-    calories: number;
-    proteinG: number;
-    fiberG: number;
-    ironMg: number;
-    calciumMg: number;
-    vitaminB12Mcg: number;
-    omega3G: number;
-    zincMg: number;
-    iodineMcg: number;
-  };
+    calories: number
+    proteinG: number
+    fiberG: number
+    ironMg: number
+    calciumMg: number
+    vitaminB12Mcg: number
+    omega3G: number
+    zincMg: number
+    iodineMcg: number
+  }
   environmentalImpact: {
-    co2eKg: number;
-    waterLiters: number;
-    landM2: number;
-    animalsPer100g: number;
-    impactScorePer100g: number;
-  };
+    co2eKg: number
+    waterLiters: number
+    landM2: number
+    animalsPer100g: number
+    impactScorePer100g: number
+  }
   pricing: {
-    avgCostPer100g: number;
-    costPer20gProtein: number | null;
-    priceTier: 'low' | 'mid' | 'high';
-  };
-  sources: string[];
-  isActive: boolean;
-  sourceReferences: string[];
-};
+    avgCostPer100g: number
+    costPer20gProtein: number | null
+    priceTier: 'low' | 'mid' | 'high'
+  }
+  sources: SourceKey[]
+  isActive: boolean
+}
 
-const USDA = 'https://fdc.nal.usda.gov/';
-const ENVIRONMENT =
-  'https://ourworldindata.org/explorers/food-footprints';
-
-const sourceReferences = {
-  nutrition: USDA,
-  environmentalImpact: ENVIRONMENT,
-  pricing: 'https://www.ers.usda.gov/data-products/',
-};
+const sourceDefinitions: Record<
+  SourceKey,
+  {
+    title: string
+    authors: string
+    publisher: string
+    publicationYear: number
+    sourceType: 'research_paper' | 'nutrition_database'
+    url: string
+    doi?: string
+    evidenceLevel: 'peer_reviewed' | 'institutional'
+    notes: string
+    isActive: boolean
+  }
+> = {
+  nutrition: {
+    title: 'FoodData Central',
+    authors: 'U.S. Department of Agriculture',
+    publisher: 'USDA',
+    publicationYear: 2019,
+    sourceType: 'nutrition_database',
+    url: 'https://fdc.nal.usda.gov/',
+    evidenceLevel: 'institutional',
+    notes:
+      'Reference database for food nutrition. Cowculator starter profiles are generic category estimates, not matched to a particular branded or prepared food record.',
+    isActive: true,
+  },
+  environmentalImpact: {
+    title: "Reducing food's environmental impacts through producers and consumers",
+    authors: 'Joseph Poore; Thomas Nemecek',
+    publisher: 'Science',
+    publicationYear: 2018,
+    sourceType: 'research_paper',
+    url: 'https://doi.org/10.1126/science.aaq0216',
+    doi: '10.1126/science.aaq0216',
+    evidenceLevel: 'peer_reviewed',
+    notes:
+      'Peer-reviewed life-cycle assessment showing substantial variation in food impacts. Cowculator starter factors are rounded category estimates, not values extracted for each specific product from this study.',
+    isActive: true,
+  },
+  waterFootprint: {
+    title: 'The green, blue and grey water footprint of crops and derived crop products',
+    authors: 'Mesfin M. Mekonnen; Arjen Y. Hoekstra',
+    publisher: 'Hydrology and Earth System Sciences',
+    publicationYear: 2011,
+    sourceType: 'research_paper',
+    url: 'https://doi.org/10.5194/hess-15-1577-2011',
+    doi: '10.5194/hess-15-1577-2011',
+    evidenceLevel: 'peer_reviewed',
+    notes:
+      'Research on water footprints of crops. Water footprint is not the same as local water scarcity or household water use; Cowculator starter factors are broad estimates.',
+    isActive: true,
+  },
+}
 
 const profiles = {
   beef: [250, 26, 0, 2.6, 18, 0.01],
@@ -117,54 +198,40 @@ const profiles = {
   avocado: [160, 2, 6.7, 0.6, 12, 0.1],
   coconutMilk: [197, 2, 0, 2.3, 18, 0.1],
   palmOil: [884, 0, 0, 0, 0, 0.2],
-} as const;
+} as const
 
 // Profile tuple order:
 // calories, protein, fiber, iron, calcium, omega-3
 function getProfile(name: string, origin: FoodOrigin, animalCategory: AnimalCategory | null) {
-  const n = name.toLowerCase();
+  const n = name.toLowerCase()
 
   if (origin === 'animal' && animalCategory) {
-    return profiles[animalCategory as keyof typeof profiles] ?? profiles.beef;
+    return profiles[animalCategory as keyof typeof profiles] ?? profiles.beef
   }
 
-  if (n.includes('avocado')) return profiles.avocado;
-  if (n.includes('coconut milk')) return profiles.coconutMilk;
-  if (n.includes('palm oil')) return profiles.palmOil;
-  if (n.includes('seitan')) return profiles.seitan;
-  if (
-    n.includes('soy') ||
-    n.includes('tofu') ||
-    n.includes('tempeh') ||
-    n.includes('mung-bean')
-  ) return profiles.soy;
-  if (
-    n.includes('lentil') ||
-    n.includes('bean') ||
-    n.includes('chickpea')
-  ) return profiles.legumes;
-  if (n.includes('mushroom')) return profiles.mushrooms;
-  if (n.includes('jackfruit')) return profiles.jackfruit;
-  if (n.includes('carrot')) return profiles.carrot;
-  if (n.includes('seaweed')) return profiles.seaweed;
-  if (n.includes('konjac')) return profiles.konjac;
-  if (
-    n.includes('flaxseed') ||
-    n.includes('chia') ||
-    n.includes('cashew')
-  ) return profiles.nuts;
-  if (n.includes('oat milk')) return profiles.oatMilk;
-  if (n.includes('coconut yogurt')) return profiles.coconutYogurt;
-  if (n.includes('nutritional yeast')) return profiles.nutritionalYeast;
-  if (n.includes('aquafaba')) return profiles.aquafaba;
+  if (n.includes('avocado')) return profiles.avocado
+  if (n.includes('coconut milk')) return profiles.coconutMilk
+  if (n.includes('palm oil')) return profiles.palmOil
+  if (n.includes('seitan')) return profiles.seitan
+  if (n.includes('soy') || n.includes('tofu') || n.includes('tempeh') || n.includes('mung-bean'))
+    return profiles.soy
+  if (n.includes('lentil') || n.includes('bean') || n.includes('chickpea')) return profiles.legumes
+  if (n.includes('mushroom')) return profiles.mushrooms
+  if (n.includes('jackfruit')) return profiles.jackfruit
+  if (n.includes('carrot')) return profiles.carrot
+  if (n.includes('seaweed')) return profiles.seaweed
+  if (n.includes('konjac')) return profiles.konjac
+  if (n.includes('flaxseed') || n.includes('chia') || n.includes('cashew')) return profiles.nuts
+  if (n.includes('oat milk')) return profiles.oatMilk
+  if (n.includes('coconut yogurt')) return profiles.coconutYogurt
+  if (n.includes('nutritional yeast')) return profiles.nutritionalYeast
+  if (n.includes('aquafaba')) return profiles.aquafaba
 
-  return profiles.vegetables;
+  return profiles.vegetables
 }
 
-const environmentalFactors: Record<
-  string,
-  { co2: number; water: number; land: number }
-> = {
+// Starter estimates per 100 g; these rounded category factors are not product-specific measurements.
+const environmentalFactors: Record<string, { co2: number; water: number; land: number }> = {
   beef: { co2: 9.95, water: 1500, land: 2 },
   pork: { co2: 1.23, water: 600, land: 0.4 },
   poultry: { co2: 0.99, water: 430, land: 0.25 },
@@ -178,10 +245,10 @@ const environmentalFactors: Record<
   fungi: { co2: 0.12, water: 80, land: 0.08 },
   fruits: { co2: 0.11, water: 80, land: 0.08 },
   vegetables: { co2: 0.08, water: 80, land: 0.08 },
-  algae: { co2: 0.10, water: 80, land: 0.08 },
+  algae: { co2: 0.1, water: 80, land: 0.08 },
   nuts_seeds: { co2: 0.04, water: 80, land: 0.08 },
-  other: { co2: 0.20, water: 80, land: 0.08 },
-};
+  other: { co2: 0.2, water: 80, land: 0.08 },
+}
 
 const prices: Record<string, number> = {
   beef: 1.8,
@@ -200,7 +267,7 @@ const prices: Record<string, number> = {
   algae: 1.5,
   nuts_seeds: 1.2,
   other: 0.8,
-};
+}
 
 function makeFood(
   name: string,
@@ -208,30 +275,33 @@ function makeFood(
   swapCategory: SwapCategory,
   foodCategory: FoodCategory,
   animalProductCategory: AnimalCategory | null,
-  textureTags: string[],
-  tasteProfiles: string[],
+  textureTags: TextureTag[],
+  tasteProfiles: TasteProfile[],
 ): Food {
-  const [calories, protein, fiber, iron, calcium, omega3] =
-    getProfile(name, foodOrigin, animalProductCategory);
+  const [calories, protein, fiber, iron, calcium, omega3] = getProfile(
+    name,
+    foodOrigin,
+    animalProductCategory,
+  )
 
-  const impactCategory = animalProductCategory ?? foodCategory;
-  const impact =
-    environmentalFactors[impactCategory] ?? environmentalFactors.other;
+  const impactCategory = animalProductCategory ?? foodCategory
+  const impact = environmentalFactors[impactCategory] ?? environmentalFactors.other
 
-  const price = prices[impactCategory] ?? prices.other;
+  const price = prices[impactCategory] ?? prices.other
 
-  const animalsPer100g = foodOrigin === 'animal'
-    ? ({
-        beef: 0.00004,
-        pork: 0.00012,
-        poultry: 0.0015,
-        fish: 0.0003,
-        seafood: 0.0005,
-        dairy: 0.00002,
-        eggs: 0.0008,
-        other: 0,
-      }[animalProductCategory ?? 'other'])
-    : 0;
+  const animalsPer100g =
+    foodOrigin === 'animal'
+      ? {
+          beef: 0.00004,
+          pork: 0.00012,
+          poultry: 0.0015,
+          fish: 0.0003,
+          seafood: 0.0005,
+          dairy: 0.00002,
+          eggs: 0.0008,
+          other: 0,
+        }[animalProductCategory ?? 'other']
+      : 0
 
   return {
     name,
@@ -266,106 +336,472 @@ function makeFood(
     },
     pricing: {
       avgCostPer100g: price,
-      costPer20gProtein: protein > 0
-        ? Number((price * 20 / protein).toFixed(2))
-        : null,
+      costPer20gProtein: protein > 0 ? Number(((price * 20) / protein).toFixed(2)) : null,
       priceTier: price < 0.5 ? 'low' : price < 1.25 ? 'mid' : 'high',
     },
-    sources: [],
+    sources: ['nutrition', 'environmentalImpact', 'waterFootprint'],
     isActive: true,
-    sourceReferences: [
-      sourceReferences.nutrition,
-      sourceReferences.environmentalImpact,
-      sourceReferences.pricing,
-    ],
-  };
+  }
 }
 
 const foods: Food[] = [
   // Animal reference foods
   makeFood('Beef', 'animal', 'beef', 'meat', 'beef', ['firm', 'chewy'], ['savory', 'umami']),
   makeFood('Pork', 'animal', 'pork', 'meat', 'pork', ['tender', 'firm'], ['savory', 'mild']),
-  makeFood('Chicken', 'animal', 'poultry', 'poultry', 'poultry', ['tender', 'fibrous'], ['savory', 'mild']),
+  makeFood(
+    'Chicken',
+    'animal',
+    'poultry',
+    'poultry',
+    'poultry',
+    ['tender', 'fibrous'],
+    ['savory', 'mild'],
+  ),
   makeFood('Salmon', 'animal', 'fish', 'fish', 'fish', ['tender', 'flaky'], ['savory', 'rich']),
-  makeFood('Shrimp', 'animal', 'seafood', 'seafood', 'seafood', ['firm', 'springy'], ['sweet', 'savory']),
-  makeFood("Cow's milk", 'animal', 'dairy', 'dairy', 'dairy', ['liquid', 'creamy'], ['mild', 'creamy']),
-  makeFood('Chicken egg', 'animal', 'eggs', 'eggs', 'eggs', ['soft', 'custardy'], ['savory', 'mild']),
+  makeFood(
+    'Shrimp',
+    'animal',
+    'seafood',
+    'seafood',
+    'seafood',
+    ['firm', 'springy'],
+    ['sweet', 'savory'],
+  ),
+  makeFood(
+    "Cow's milk",
+    'animal',
+    'dairy',
+    'dairy',
+    'dairy',
+    ['liquid', 'creamy'],
+    ['mild', 'creamy'],
+  ),
+  makeFood(
+    'Chicken egg',
+    'animal',
+    'eggs',
+    'eggs',
+    'eggs',
+    ['soft', 'custardy'],
+    ['savory', 'mild'],
+  ),
 
   // Beef replacements
-  makeFood('Seitan beef-style strips', 'plant', 'beef', 'grains', null, ['chewy', 'fibrous'], ['savory', 'umami']),
-  makeFood('Soy protein beef crumbles', 'plant', 'beef', 'soy', null, ['crumbly', 'chewy'], ['savory', 'umami']),
-  makeFood('Lentil burger patty', 'plant', 'beef', 'legumes', null, ['firm', 'moist'], ['earthy', 'savory']),
-  makeFood('Black bean burger patty', 'plant', 'beef', 'legumes', null, ['soft', 'dense'], ['earthy', 'savory']),
-  makeFood('Mushroom-walnut mince', 'plant', 'beef', 'fungi', null, ['crumbly', 'meaty'], ['earthy', 'umami']),
-  makeFood('Pea-protein beef-style patty', 'plant', 'beef', 'other', null, ['firm', 'juicy'], ['savory', 'umami']),
+  makeFood(
+    'Seitan beef-style strips',
+    'plant',
+    'beef',
+    'grains',
+    null,
+    ['chewy', 'fibrous'],
+    ['savory', 'umami'],
+  ),
+  makeFood(
+    'Soy protein beef crumbles',
+    'plant',
+    'beef',
+    'soy',
+    null,
+    ['crumbly', 'chewy'],
+    ['savory', 'umami'],
+  ),
+  makeFood(
+    'Lentil burger patty',
+    'plant',
+    'beef',
+    'legumes',
+    null,
+    ['firm', 'moist'],
+    ['earthy', 'savory'],
+  ),
+  makeFood(
+    'Black bean burger patty',
+    'plant',
+    'beef',
+    'legumes',
+    null,
+    ['soft', 'dense'],
+    ['earthy', 'savory'],
+  ),
+  makeFood(
+    'Mushroom-walnut mince',
+    'plant',
+    'beef',
+    'fungi',
+    null,
+    ['crumbly', 'meaty'],
+    ['earthy', 'umami'],
+  ),
+  makeFood(
+    'Pea-protein beef-style patty',
+    'plant',
+    'beef',
+    'other',
+    null,
+    ['firm', 'juicy'],
+    ['savory', 'umami'],
+  ),
 
   // Pork replacements
-  makeFood('Jackfruit pulled-pork style', 'plant', 'pork', 'fruits', null, ['fibrous', 'tender'], ['mild', 'savory']),
-  makeFood('Seitan pork-style strips', 'plant', 'pork', 'grains', null, ['chewy', 'fibrous'], ['savory', 'umami']),
+  makeFood(
+    'Jackfruit pulled-pork style',
+    'plant',
+    'pork',
+    'fruits',
+    null,
+    ['fibrous', 'tender'],
+    ['mild', 'savory'],
+  ),
+  makeFood(
+    'Seitan pork-style strips',
+    'plant',
+    'pork',
+    'grains',
+    null,
+    ['chewy', 'fibrous'],
+    ['savory', 'umami'],
+  ),
   makeFood('Soy curls pork-style', 'plant', 'pork', 'soy', null, ['chewy', 'fibrous'], ['savory']),
-  makeFood('Tempeh bacon-style strips', 'plant', 'pork', 'soy', null, ['firm', 'chewy'], ['smoky', 'savory']),
-  makeFood('Smoked tofu strips', 'plant', 'pork', 'soy', null, ['firm', 'chewy'], ['smoky', 'savory']),
-  makeFood('Mushroom sausage-style crumble', 'plant', 'pork', 'fungi', null, ['crumbly', 'tender'], ['savory', 'herbal']),
+  makeFood(
+    'Tempeh bacon-style strips',
+    'plant',
+    'pork',
+    'soy',
+    null,
+    ['firm', 'chewy'],
+    ['smoky', 'savory'],
+  ),
+  makeFood(
+    'Smoked tofu strips',
+    'plant',
+    'pork',
+    'soy',
+    null,
+    ['firm', 'chewy'],
+    ['smoky', 'savory'],
+  ),
+  makeFood(
+    'Mushroom sausage-style crumble',
+    'plant',
+    'pork',
+    'fungi',
+    null,
+    ['crumbly', 'tender'],
+    ['savory', 'herbal'],
+  ),
 
   // Poultry replacements
-  makeFood('Soy-based chicken-style chunks', 'plant', 'poultry', 'soy', null, ['firm', 'chewy'], ['savory', 'mild']),
-  makeFood('Seitan chicken-style pieces', 'plant', 'poultry', 'grains', null, ['fibrous', 'chewy'], ['savory', 'mild']),
-  makeFood('Chickpea cutlet', 'plant', 'poultry', 'legumes', null, ['firm', 'soft'], ['nutty', 'savory']),
-  makeFood('Tofu chicken-style cubes', 'plant', 'poultry', 'soy', null, ['firm', 'tender'], ['mild', 'savory']),
-  makeFood('Cauliflower chicken-style bites', 'plant', 'poultry', 'vegetables', null, ['tender', 'crisp'], ['mild', 'savory']),
-  makeFood('Pea-protein chicken-style strips', 'plant', 'poultry', 'other', null, ['fibrous', 'chewy'], ['savory', 'mild']),
+  makeFood(
+    'Soy-based chicken-style chunks',
+    'plant',
+    'poultry',
+    'soy',
+    null,
+    ['firm', 'chewy'],
+    ['savory', 'mild'],
+  ),
+  makeFood(
+    'Seitan chicken-style pieces',
+    'plant',
+    'poultry',
+    'grains',
+    null,
+    ['fibrous', 'chewy'],
+    ['savory', 'mild'],
+  ),
+  makeFood(
+    'Chickpea cutlet',
+    'plant',
+    'poultry',
+    'legumes',
+    null,
+    ['firm', 'soft'],
+    ['nutty', 'savory'],
+  ),
+  makeFood(
+    'Tofu chicken-style cubes',
+    'plant',
+    'poultry',
+    'soy',
+    null,
+    ['firm', 'tender'],
+    ['mild', 'savory'],
+  ),
+  makeFood(
+    'Cauliflower chicken-style bites',
+    'plant',
+    'poultry',
+    'vegetables',
+    null,
+    ['tender', 'crisp'],
+    ['mild', 'savory'],
+  ),
+  makeFood(
+    'Pea-protein chicken-style strips',
+    'plant',
+    'poultry',
+    'other',
+    null,
+    ['fibrous', 'chewy'],
+    ['savory', 'mild'],
+  ),
 
   // Fish replacements
-  makeFood('Banana blossom fish-style fillet', 'plant', 'fish', 'fruits', null, ['flaky', 'tender'], ['mild', 'briny']),
-  makeFood('Tofu fish-style fillet', 'plant', 'fish', 'soy', null, ['tender', 'flaky'], ['mild', 'savory']),
-  makeFood('Hearts-of-palm fish-style pieces', 'plant', 'fish', 'vegetables', null, ['tender', 'fibrous'], ['mild', 'briny']),
-  makeFood('Carrot lox', 'plant', 'fish', 'vegetables', null, ['silky', 'tender'], ['smoky', 'salty']),
-  makeFood('Seaweed-seasoned tempeh', 'plant', 'fish', 'soy', null, ['firm', 'chewy'], ['umami', 'briny']),
-  makeFood('Plant-protein fish-style fillet', 'plant', 'fish', 'other', null, ['flaky', 'firm'], ['mild', 'savory']),
+  makeFood(
+    'Banana blossom fish-style fillet',
+    'plant',
+    'fish',
+    'fruits',
+    null,
+    ['flaky', 'tender'],
+    ['mild', 'briny'],
+  ),
+  makeFood(
+    'Tofu fish-style fillet',
+    'plant',
+    'fish',
+    'soy',
+    null,
+    ['tender', 'flaky'],
+    ['mild', 'savory'],
+  ),
+  makeFood(
+    'Hearts-of-palm fish-style pieces',
+    'plant',
+    'fish',
+    'vegetables',
+    null,
+    ['tender', 'fibrous'],
+    ['mild', 'briny'],
+  ),
+  makeFood(
+    'Carrot lox',
+    'plant',
+    'fish',
+    'vegetables',
+    null,
+    ['silky', 'tender'],
+    ['smoky', 'salty'],
+  ),
+  makeFood(
+    'Seaweed-seasoned tempeh',
+    'plant',
+    'fish',
+    'soy',
+    null,
+    ['firm', 'chewy'],
+    ['umami', 'briny'],
+  ),
+  makeFood(
+    'Plant-protein fish-style fillet',
+    'plant',
+    'fish',
+    'other',
+    null,
+    ['flaky', 'firm'],
+    ['mild', 'savory'],
+  ),
 
   // Seafood replacements
-  makeFood('King oyster mushroom scallops', 'plant', 'seafood', 'fungi', null, ['firm', 'tender'], ['umami', 'mild']),
-  makeFood('Konjac shrimp-style pieces', 'plant', 'seafood', 'other', null, ['springy', 'firm'], ['mild', 'briny']),
-  makeFood('Hearts-of-palm crab-style cakes', 'plant', 'seafood', 'vegetables', null, ['fibrous', 'tender'], ['mild', 'savory']),
-  makeFood('Chickpea tuna-style salad', 'plant', 'seafood', 'legumes', null, ['flaky', 'creamy'], ['savory', 'tangy']),
-  makeFood('Seaweed-based calamari-style rings', 'plant', 'seafood', 'algae', null, ['chewy', 'springy'], ['briny', 'umami']),
-  makeFood('Plant-protein crab-style pieces', 'plant', 'seafood', 'other', null, ['flaky', 'firm'], ['sweet', 'savory']),
+  makeFood(
+    'King oyster mushroom scallops',
+    'plant',
+    'seafood',
+    'fungi',
+    null,
+    ['firm', 'tender'],
+    ['umami', 'mild'],
+  ),
+  makeFood(
+    'Konjac shrimp-style pieces',
+    'plant',
+    'seafood',
+    'other',
+    null,
+    ['springy', 'firm'],
+    ['mild', 'briny'],
+  ),
+  makeFood(
+    'Hearts-of-palm crab-style cakes',
+    'plant',
+    'seafood',
+    'vegetables',
+    null,
+    ['fibrous', 'tender'],
+    ['mild', 'savory'],
+  ),
+  makeFood(
+    'Chickpea tuna-style salad',
+    'plant',
+    'seafood',
+    'legumes',
+    null,
+    ['flaky', 'creamy'],
+    ['savory', 'tangy'],
+  ),
+  makeFood(
+    'Seaweed-based calamari-style rings',
+    'plant',
+    'seafood',
+    'algae',
+    null,
+    ['chewy', 'springy'],
+    ['briny', 'umami'],
+  ),
+  makeFood(
+    'Plant-protein crab-style pieces',
+    'plant',
+    'seafood',
+    'other',
+    null,
+    ['flaky', 'firm'],
+    ['sweet', 'savory'],
+  ),
 
   // Dairy replacements
-  makeFood('Calcium-set firm tofu', 'plant', 'dairy', 'soy', null, ['firm', 'creamy'], ['mild', 'nutty']),
-  makeFood('Unsweetened fortified soy milk', 'plant', 'dairy', 'soy', null, ['liquid', 'creamy'], ['mild', 'bean-like']),
-  makeFood('Unsweetened oat milk', 'plant', 'dairy', 'grains', null, ['liquid', 'creamy'], ['mild', 'sweet']),
-  makeFood('Coconut yogurt, plain', 'plant', 'dairy', 'fruits', null, ['creamy', 'thick'], ['tangy', 'mild']),
-  makeFood('Cashew cream cheese', 'plant', 'dairy', 'nuts_seeds', null, ['creamy', 'spreadable'], ['tangy', 'nutty']),
-  makeFood('Nutritional yeast', 'plant', 'dairy', 'fungi', null, ['flaky', 'powdery'], ['cheesy', 'umami']),
+  makeFood(
+    'Calcium-set firm tofu',
+    'plant',
+    'dairy',
+    'soy',
+    null,
+    ['firm', 'creamy'],
+    ['mild', 'nutty'],
+  ),
+  makeFood(
+    'Unsweetened fortified soy milk',
+    'plant',
+    'dairy',
+    'soy',
+    null,
+    ['liquid', 'creamy'],
+    ['mild', 'bean-like'],
+  ),
+  makeFood(
+    'Unsweetened oat milk',
+    'plant',
+    'dairy',
+    'grains',
+    null,
+    ['liquid', 'creamy'],
+    ['mild', 'sweet'],
+  ),
+  makeFood(
+    'Coconut yogurt, plain',
+    'plant',
+    'dairy',
+    'fruits',
+    null,
+    ['creamy', 'thick'],
+    ['tangy', 'mild'],
+  ),
+  makeFood(
+    'Cashew cream cheese',
+    'plant',
+    'dairy',
+    'nuts_seeds',
+    null,
+    ['creamy', 'spreadable'],
+    ['tangy', 'nutty'],
+  ),
+  makeFood(
+    'Nutritional yeast',
+    'plant',
+    'dairy',
+    'fungi',
+    null,
+    ['flaky', 'powdery'],
+    ['cheesy', 'umami'],
+  ),
 
   // Egg replacements
-  makeFood('Ground flaxseed egg substitute', 'plant', 'eggs', 'nuts_seeds', null, ['gel-like', 'thick'], ['nutty', 'mild']),
-  makeFood('Chia egg substitute', 'plant', 'eggs', 'nuts_seeds', null, ['gel-like', 'thick'], ['mild', 'nutty']),
+  makeFood(
+    'Ground flaxseed egg substitute',
+    'plant',
+    'eggs',
+    'nuts_seeds',
+    null,
+    ['gel-like', 'thick'],
+    ['nutty', 'mild'],
+  ),
+  makeFood(
+    'Chia egg substitute',
+    'plant',
+    'eggs',
+    'nuts_seeds',
+    null,
+    ['gel-like', 'thick'],
+    ['mild', 'nutty'],
+  ),
   makeFood('Aquafaba', 'plant', 'eggs', 'legumes', null, ['foamy', 'liquid'], ['mild', 'neutral']),
-  makeFood('Mung-bean egg-style scramble', 'plant', 'eggs', 'legumes', null, ['soft', 'custardy'], ['savory', 'mild']),
+  makeFood(
+    'Mung-bean egg-style scramble',
+    'plant',
+    'eggs',
+    'legumes',
+    null,
+    ['soft', 'custardy'],
+    ['savory', 'mild'],
+  ),
 
   // Additional foods
   makeFood('Avocado', 'plant', 'other', 'fruits', null, ['creamy', 'soft'], ['mild', 'buttery']),
-  makeFood('Coconut milk', 'plant', 'other', 'fruits', null, ['liquid', 'creamy'], ['sweet', 'coconut']),
+  makeFood(
+    'Coconut milk',
+    'plant',
+    'other',
+    'fruits',
+    null,
+    ['liquid', 'creamy'],
+    ['sweet', 'coconut'],
+  ),
   makeFood('Palm oil', 'plant', 'other', 'other', null, ['oily', 'liquid'], ['neutral']),
-];
+]
 
 if (foods.length !== 50) {
-  throw new Error(`Expected 50 foods, got ${foods.length}`);
+  throw new Error(`Expected 50 foods, got ${foods.length}`)
 }
 
 const payload = await getPayload({ config })
 
 try {
+  const sourceIds = new Map<SourceKey, number>()
+
+  for (const [sourceKey, source] of Object.entries(sourceDefinitions) as [
+    SourceKey,
+    (typeof sourceDefinitions)[SourceKey],
+  ][]) {
+    const existing = await payload.find({
+      collection: 'sources',
+      where: source.doi ? { doi: { equals: source.doi } } : { url: { equals: source.url } },
+      limit: 1,
+      overrideAccess: true,
+    })
+    const existingSource = existing.docs[0]
+    const savedSource = existingSource
+      ? await payload.update({
+          collection: 'sources',
+          id: existingSource.id,
+          data: source,
+          overrideAccess: true,
+        })
+      : await payload.create({
+          collection: 'sources',
+          data: source,
+          overrideAccess: true,
+        })
+
+    sourceIds.set(sourceKey, savedSource.id)
+  }
+
   let created = 0
   let updated = 0
 
   for (const food of foods) {
-    // These aren't fields in the current Foods collection schema.
-    const { sources: _sources, sourceReferences: _sourceReferences, ...data } = food
-    void _sources
-    void _sourceReferences
+    const data = {
+      ...food,
+      sources: food.sources.map((sourceKey) => sourceIds.get(sourceKey)!),
+    }
 
     const existing = await payload.find({
       collection: 'foods',

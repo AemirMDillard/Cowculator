@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { BodyCustomCode, renderHeadCustomCode } from '@/lib/make-custom-code'
 import { makeSiteSettings, sanitizeHtmlAttribute } from '@/lib/make-site-settings'
 import { SiteFooter, SiteHeader } from '@/components/cowculator'
+import { ThemeInitializer } from '@/components/cowculator/theme-initializer'
 import './styles.css'
 
 const defaultTitle = 'Cowculator — Small swaps. Big moo-vement.'
@@ -45,8 +46,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {renderHeadCustomCode(customScripts?.headStart, 'head-start')}
         {renderHeadCustomCode(customScripts?.headEnd, 'head-end')}
       </head>
-      <body className="min-h-screen bg-[#F5F0DF] text-[#3F382F] antialiased">
+      <body className="min-h-screen antialiased">
         <BodyCustomCode html={customScripts?.bodyStart} />
+        <ThemeInitializer />
         {addBypassLinks && (
           <a className="skip-link" href="#root">
             Skip to content

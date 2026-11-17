@@ -12,18 +12,12 @@ export async function GET() {
       where: { isActive: { equals: true } },
       sort: 'name',
       limit: 1000,
-      depth: 0,
+      depth: 1,
     })
 
-    return NextResponse.json(
-      { docs: result.docs },
-      { headers: { 'Cache-Control': 'no-store' } },
-    )
+    return NextResponse.json({ docs: result.docs }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     console.error('GET /api/foods:', error)
-    return NextResponse.json(
-      { error: 'Unable to load foods.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Unable to load foods.' }, { status: 500 })
   }
 }

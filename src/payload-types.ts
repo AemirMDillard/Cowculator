@@ -153,6 +153,7 @@ export interface Config {
     foods: Food;
     sources: Source;
     leaderboard: Leaderboard;
+    friendships: Friendship;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -169,6 +170,7 @@ export interface Config {
     foods: FoodsSelect<false> | FoodsSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
     leaderboard: LeaderboardSelect<false> | LeaderboardSelect<true>;
+    friendships: FriendshipsSelect<false> | FriendshipsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -285,6 +287,8 @@ export interface User {
   id: number;
   name: string;
   wantsMealPlan?: boolean | null;
+  referralCode?: string | null;
+  referralCodeUsed?: string | null;
   dietType?: ('vegan' | 'vegetarian' | 'pescatarian' | 'omnivore' | 'other' | 'not_sure') | null;
   plantBasedGoalDaysPerWeek?: number | null;
   activeSwaps?:
@@ -576,11 +580,20 @@ export interface Food {
     zincMg?: number | null;
     iodineMcg?: number | null;
   };
+  /**
+   * Rounded category estimates per 100 g, not product-specific measurements. See linked sources and notes.
+   */
   environmentalImpact?: {
     co2eKg?: number | null;
     waterLiters?: number | null;
     landM2?: number | null;
+    /**
+     * Unvalidated legacy field; excluded from impact and leaderboard calculations.
+     */
     animalsPer100g?: number | null;
+    /**
+     * Game score only; not an environmental unit.
+     */
     impactScorePer100g?: number | null;
   };
   pricing?: {
@@ -588,6 +601,14 @@ export interface Food {
     costPer20gProtein?: number | null;
     priceTier?: ('low' | 'mid' | 'high') | null;
   };
+  /**
+   * Optional retailer URL. Leave blank until Cowculator has an approved partner link.
+   */
+  affiliateUrl?: string | null;
+  /**
+   * Visible link text. Only shown when both the URL and label are set.
+   */
+  affiliateLabel?: string | null;
   sources?: (number | Source)[] | null;
   isActive?: boolean | null;
   createdBy?:
@@ -663,8 +684,40 @@ export interface Leaderboard {
   animalImpactScore?: number | null;
   environmentalScore?: number | null;
   plantBasedScore?: number | null;
+  optimizationPoints?: number | null;
+  referralPoints?: number | null;
   combinedScore?: number | null;
   lastUpdated?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: number | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "friendships".
+ */
+export interface Friendship {
+  id: number;
+  requester: number | User;
+  recipient: number | User;
+  status: 'pending' | 'accepted' | 'declined';
   createdBy?:
     | ({
         relationTo: 'admins';
@@ -741,6 +794,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'leaderboard';
         value: number | Leaderboard;
+      } | null)
+    | ({
+        relationTo: 'friendships';
+        value: number | Friendship;
       } | null);
   globalSlug?: string | null;
   user:
@@ -860,6 +917,8 @@ export interface AdminsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   wantsMealPlan?: T;
+  referralCode?: T;
+  referralCodeUsed?: T;
   dietType?: T;
   plantBasedGoalDaysPerWeek?: T;
   activeSwaps?: T;
@@ -1018,6 +1077,8 @@ export interface FoodsSelect<T extends boolean = true> {
         costPer20gProtein?: T;
         priceTier?: T;
       };
+  affiliateUrl?: T;
+  affiliateLabel?: T;
   sources?: T;
   isActive?: T;
   createdBy?: T;
@@ -1059,8 +1120,23 @@ export interface LeaderboardSelect<T extends boolean = true> {
   animalImpactScore?: T;
   environmentalScore?: T;
   plantBasedScore?: T;
+  optimizationPoints?: T;
+  referralPoints?: T;
   combinedScore?: T;
   lastUpdated?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "friendships_select".
+ */
+export interface FriendshipsSelect<T extends boolean = true> {
+  requester?: T;
+  recipient?: T;
+  status?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1149,7 +1225,8 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard';
+    relatedCollection:
+      'admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard' | 'friendships';
     where?:
       | {
           [k: string]: unknown;
@@ -1172,7 +1249,8 @@ export interface CollectionQueryWidget {
 export interface ActivityWidget {
   data?: {
     excludedCollections?:
-      ('admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard')[] | null;
+      | ('admins' | 'users' | 'media' | 'folders' | 'tags' | 'foods' | 'sources' | 'leaderboard' | 'friendships')[]
+      | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
