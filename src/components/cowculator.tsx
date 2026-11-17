@@ -357,9 +357,9 @@ export function LandingPage() {
               COWCULATOR
             </div>
             <h1 className="mt-6 max-w-2xl text-[clamp(3.6rem,8vw,7.4rem)] font-black leading-[.82] tracking-[-.07em]">
-              BEE IN A
+              <span className="text-[#E9D48E]">BEE</span> IN A
               <br />
-              <span className="text-[#A8B99A]">BIG MOO-</span>
+              BIG <span className="text-[#A8B99A]"> MOO-</span>
               <br />
               VEMENT.
             </h1>
@@ -486,13 +486,12 @@ const dietPatternQuestion: Question = {
   id: 'dietPattern',
   category: 'START HERE',
   question: 'Which best describes how you eat right now?',
-  detail: 'There is no right or wrong answer. Choose what feels closest.',
+  detail: '',
   options: [
     'Fully plant-based (vegan)',
     'Mostly plant-based',
     'Vegetarian',
     'A mix of plant and animal foods',
-    'Something else / not sure',
   ],
 }
 
@@ -507,8 +506,31 @@ const plantBasedQuestions: Question[] = [
       'Explore nutritional variety',
       'Understand my environmental impact',
       'Explore animal welfare impact',
-      'Just looking around',
     ],
+  },
+]
+
+const plantIngredientQuestions: Question[] = [
+  {
+    id: 'avocados',
+    category: 'PLANT-BASED FOODS',
+    question: 'How often do you eat avocados?',
+    detail: 'Include avocado in meals, snacks, spreads, or drinks.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
+  },
+  {
+    id: 'palmOil',
+    category: 'PLANT-BASED FOODS',
+    question: 'How often do you eat foods containing palm oil?',
+    detail: 'As best you can estimate—palm oil can be in packaged snacks, baked goods, and spreads.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
+  },
+  {
+    id: 'almondMilk',
+    category: 'PLANT-BASED FOODS',
+    question: 'How often do you drink almond milk?',
+    detail: 'Include almond milk in drinks, cereal, cooking, or baking.',
+    options: ['Daily', 'A few times a week', 'Occasionally', 'Never'],
   },
 ]
 
@@ -584,13 +606,27 @@ function getQuestions(dietPattern?: string): Question[] {
   if (!dietPattern) return [dietPatternQuestion]
 
   if (dietPattern === 'Fully plant-based (vegan)') {
-    return [dietPatternQuestion, ...plantBasedQuestions]
+    return [
+      dietPatternQuestion,
+      ...plantBasedQuestions,
+      ...plantIngredientQuestions,
+    ]
   }
 
   if (dietPattern === 'Vegetarian') {
     return [
       dietPatternQuestion,
       ...vegetarianQuestions,
+      ...plantIngredientQuestions,
+      plantMealQuestion,
+    ]
+  }
+
+  if (dietPattern === 'Mostly plant-based') {
+    return [
+      dietPatternQuestion,
+      ...animalFoodQuestions,
+      ...plantIngredientQuestions,
       plantMealQuestion,
     ]
   }
@@ -601,7 +637,6 @@ function getQuestions(dietPattern?: string): Question[] {
     plantMealQuestion,
   ]
 }
-
 
 export function CalculatorPage() {
   const [step, setStep] = useState(0)
@@ -951,9 +986,6 @@ function formatLand(value: number) {
   return `${formatNumber(value, 2)} m²`
 }
 
-function formatAnimals(value: number) {
-  return formatNumber(value, 2)
-}
 
 function StatCard({
   icon,
@@ -1127,8 +1159,7 @@ export function ResultsPage() {
   const hasImpact =
     impact.co2eSaved > 0 ||
     impact.waterSaved > 0 ||
-    impact.landSaved > 0 ||
-    impact.animalsSpared > 0
+    impact.landSaved > 0
 
   return (
     <main className="page-shell results-bg">
@@ -1203,13 +1234,6 @@ export function ResultsPage() {
               color={colors.yellow}
             />
 
-            <StatCard
-              icon="paw"
-              value={formatAnimals(impact.animalsSpared)}
-              unit=""
-              label="ESTIMATED ANIMAL IMPACT"
-              color={colors.pink}
-            />
           </div>
         ) : (
           <div className="mt-5 border-2 border-[#3F382F] bg-white p-8 text-center">
@@ -1608,13 +1632,6 @@ export function DashboardPage() {
                 <span className="pixel-label">LAND</span>
                 <h3 className="mt-2 text-3xl font-black">
                   {formatLand(impact.landSaved)}
-                </h3>
-              </div>
-
-              <div>
-                <span className="pixel-label">ANIMAL IMPACT</span>
-                <h3 className="mt-2 text-3xl font-black">
-                  {formatAnimals(impact.animalsSpared)}
                 </h3>
               </div>
             </div>

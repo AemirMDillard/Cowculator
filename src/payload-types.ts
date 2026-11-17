@@ -318,6 +318,7 @@ export interface User {
     landSaved?: number | null;
     animalsSpared?: number | null;
   };
+  lastStreakWeek?: string | null;
   currentStreak?: number | null;
   lastImpactUpdate?: string | null;
   calculationVersion?: string | null;
@@ -880,6 +881,7 @@ export interface UsersSelect<T extends boolean = true> {
         landSaved?: T;
         animalsSpared?: T;
       };
+  lastStreakWeek?: T;
   currentStreak?: T;
   lastImpactUpdate?: T;
   calculationVersion?: T;

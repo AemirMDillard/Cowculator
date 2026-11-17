@@ -29,6 +29,37 @@ type Choice =
   | { type: 'give-up' }
   | { type: 'custom'; suggestion: string; notes?: string }
 
+
+function isSavedChoice(value: unknown): value is Choice {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+
+  const choice = value as Record<string, unknown>
+
+  if (choice.type === 'give-up') return true
+
+  if (choice.type === 'alternative') {
+    return (
+      typeof choice.foodId === 'string' &&
+      typeof choice.swapId === 'string'
+    )
+  }
+
+  return (
+    choice.type === 'custom' &&
+    typeof choice.suggestion === 'string' &&
+    (choice.notes === undefined || typeof choice.notes === 'string')
+  )
+}
+
+function isSavedChoiceMap(value: unknown): value is Record<string, Choice> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.values(value).every(isSavedChoice)
+  )
+}
+
 const questionForCategory: Record<string, string> = {
   beef: 'redMeat',
   pork: 'redMeat',
@@ -135,21 +166,63 @@ export function SwapsClient() {
         const foodsData = await foodsResponse.json()
         setFoods(foodsData.docs ?? [])
 
-        if (savedResponse.ok) {
-  const savedData = await savedResponse.json()
-  const savedChoices = savedData.activeSwaps
+if (savedResponse.ok) {
+  const savedData: unknown = await savedResponse.json()
 
-  if (
-    savedChoices &&
-    typeof savedChoices === 'object' &&
-    !Array.isArray(savedChoices)
-  ) {
-    setChoices(savedChoices)
+  if (!savedData || typeof savedData !== 'object' || Array.isArray(savedData)) {
+    throw new Error('The saved swaps response was invalid.')
+  }
 
-    localStorage.setItem(
-      'cowculator-swaps',
-      JSON.stringify(savedChoices)
-    )
+  const accountChoices = (
+    savedData as { activeSwaps?: unknown }
+  ).activeSwaps
+
+  if (!isSavedChoiceMap(accountChoices)) {
+    throw new Error('The saved swaps data was invalid.')
+  }
+
+  const localChoicesText = localStorage.getItem('cowculator-swaps')
+  const parsedLocalChoices: unknown = localChoicesText
+    ? JSON.parse(localChoicesText)
+    : {}
+
+  if (!isSavedChoiceMap(parsedLocalChoices)) {
+    throw new Error('Your saved guest swaps were invalid.')
+  }
+
+  // Local choices win for the same food; account-only choices are preserved.
+  const mergedChoices = { ...accountChoices, ...parsedLocalChoices }
+  const hasGuestChanges = Object.entries(parsedLocalChoices).some(
+    ([foodId, choice]) =>
+      JSON.stringify(accountChoices[foodId]) !== JSON.stringify(choice),
+  )
+
+  setChoices(mergedChoices)
+  localStorage.setItem('cowculator-swaps', JSON.stringify(mergedChoices))
+
+  if (hasGuestChanges) {
+    try {
+      const syncResponse = await fetch('/api/active-swaps', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activeSwaps: mergedChoices }),
+      })
+
+      if (!syncResponse.ok) {
+        const details = await syncResponse.text()
+        console.error('Guest swap sync failed:', {
+          status: syncResponse.status,
+          details,
+        })
+        setError('Your swaps are still saved on this device, but could not sync to your account.')
+      } else {
+        setError('')
+      }
+    } catch (syncError) {
+      console.error('Guest swap sync failed:', syncError)
+      setError('Your swaps are still saved on this device, but could not sync to your account.')
+    }
   }
 } else if (savedResponse.status !== 401) {
   const errorBody = await savedResponse.text()

@@ -185,6 +185,14 @@ export const Users: CollectionConfig = {
 
     // TRACKING
     {
+      name: 'lastStreakWeek',
+      type: 'text',
+      label: 'Last week credited to streak',
+      access: {
+        update: isAdmin,
+      },
+    },
+    {
       name: 'currentStreak',
       type: 'number',
       label: 'Current plant-based goal streak',
